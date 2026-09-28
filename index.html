@@ -104,7 +104,21 @@
       gap: 12px;
       padding: 10px 0;
       font-size: 16px;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
+    /* The little "pop" when you check something off */
+    .item.done .check { animation: pop 0.25s ease-out; }
+    @keyframes pop { 50% { transform: scale(1.4); } }
+
+    /* The reverse: a little "shrink" when you uncheck it */
+    .item.undo .check { animation: unpop 0.25s ease-out; }
+    @keyframes unpop { 50% { transform: scale(0.7); } }
+
+    /* The score counter next to the date */
+    .date { display: flex; justify-content: space-between; align-items: center; }
+    .score { font-size: 10px; color: var(--pink); text-shadow: 0 0 8px var(--pink); }
     .item + .item { border-top: 1px solid rgba(41, 231, 255, 0.15); }
     .check {
       width: 18px;
@@ -112,7 +126,9 @@
       flex: none;
       border-radius: 5px;
       border: 2px solid var(--cyan);
+      transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;   /* colors fade instead of jumping */
     }
+    .item span { transition: color 0.2s; }
     .item.done .check { background: var(--pink); border-color: var(--pink); box-shadow: 0 0 8px var(--pink); }
     .item.done span   { color: var(--dim); text-decoration: line-through; }
 
@@ -153,15 +169,14 @@
   <!-- MIDDLE: the part that scrolls -->
   <main>
     <h1 class="day-title pixel">DAY 1-UP</h1>
-    <p class="date">Tuesday, Sep 29</p>
+    <p class="date">
+      <span id="today"></span>
+      <span id="score" class="score pixel"></span>
+    </p>
 
-    <!-- List of things for the day (examples for now) -->
-    <div class="list glow-cyan">
-      <div class="item done"><div class="check"></div><span>Work 7:30–15:00</span></div>
-      <div class="item"><div class="check"></div><span>Laundry</span></div>
-      <div class="item"><div class="check"></div><span>Unreal lesson</span></div>
-      <div class="item"><div class="check"></div><span>Walk 20 min</span></div>
-    </div>
+    <!-- List of things for the day. It starts EMPTY here:
+         the script at the bottom fills it in. -->
+    <div class="list glow-cyan" id="day-list"></div>
 
     <!-- Widgets (examples: each will come from its own page later) -->
     <div class="widgets">
@@ -207,5 +222,60 @@
     <button class="tab"><i class="ti ti-device-tv"></i>Binging</button>
     <button class="tab"><i class="ti ti-dots"></i>More</button>
   </nav>
+
+  <!-- ========== PART 4: THE "SCRIPT" (JavaScript) ==========
+       This is what the app DOES: filling in the date, reacting to taps. -->
+  <script>
+    // STEP 1: Write today's date automatically
+    const today = new Date();
+    document.getElementById('today').textContent =
+      today.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
+    // STEP 2: The list for the day.
+    // Each task has its text, and "done" is true (checked) or false (not yet).
+    const dayList = [
+      { text: 'Work 7:30–15:00', done: true },
+      { text: 'Laundry', done: false },
+      { text: 'Unreal lesson', done: false },
+      { text: 'Walk 20 min', done: false }
+    ];
+
+    // STEP 3: Update the score, like "CLEAR 1/4"
+    function updateScore() {
+      const doneCount = dayList.filter(function (task) { return task.done; }).length;
+      document.getElementById('score').textContent = 'CLEAR ' + doneCount + '/' + dayList.length;
+    }
+
+    // STEP 4: Draw every task on the screen
+    function drawList() {
+      const box = document.getElementById('day-list');
+      box.innerHTML = '';                                   // empty the box first
+
+      dayList.forEach(function (task) {                     // for each task in the list...
+        const row = document.createElement('div');          // make a new row
+        row.className = task.done ? 'item done' : 'item';   // checked or not?
+        row.innerHTML = '<div class="check"></div><span></span>';
+        row.querySelector('span').textContent = task.text;  // put the task's words in
+
+        // When you tap the row: flip done/not done, play the right animation, update the score
+        row.onclick = function () {
+          task.done = !task.done;
+          row.classList.toggle('done');
+          row.classList.remove('undo');
+          if (!task.done) {
+            row.classList.add('undo');   // just unchecked? play the "shrink" animation
+          }
+          updateScore();
+        };
+
+        box.appendChild(row);                               // add the row to the screen
+      });
+
+      updateScore();
+    }
+
+    // STEP 5: Start everything
+    drawList();
+  </script>
 </body>
 </html>
