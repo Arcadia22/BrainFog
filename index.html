@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>BrainFog</title>
 
-  <!-- The pixel font for titles, and the icon set -->
+  <!-- The fonts (pixel for titles, Chakra Petch for everything else) and the icon set -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Chakra+Petch:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
 
@@ -18,16 +18,21 @@
   <style>
     /* Your color palette. Change a color here and it changes everywhere. */
     :root {
-      --bg: #0d0b1e;      /* dark arcade background */
+      --bg: #0d0b1e;       /* dark arcade background */
+      --field: #17132e;    /* slightly lighter, for boxes you type in */
       --pink: #ff3fa4;
       --cyan: #29e7ff;
       --yellow: #ffe14d;
+      --green: #5dff9b;
+      --purple: #b59cff;   /* durations */
+      --red: #ff5a5a;      /* delete and error messages */
       --text: #e8e6ff;
-      --dim: #8f8ab8;     /* faded text for finished things */
-      --round: 14px;      /* how round the corners are */
+      --dim: #8f8ab8;      /* faded text for finished things */
+      --round: 14px;       /* how round the corners are */
     }
 
     * { box-sizing: border-box; }
+    .hidden { display: none !important; }
 
     /* The whole screen: top bar, scrolling middle, bottom bar, stacked */
     body {
@@ -73,6 +78,8 @@
       color: var(--cyan);
       font-size: 10px;
       font-family: inherit;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
     .tab i { font-size: 22px; }
     .tab.active { color: var(--yellow); text-shadow: 0 0 8px var(--yellow); }
@@ -84,53 +91,116 @@
       padding: 8px 16px 20px;
     }
 
-    .day-title {
+    .page-title {
       color: var(--yellow);
       font-size: 14px;
       margin: 8px 0 6px;
       text-shadow: 0 0 10px var(--yellow);
     }
-    .date { color: var(--cyan); font-size: 14px; margin: 0 0 14px; }
+    .date {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--cyan);
+      font-size: 14px;
+      margin: 0 0 14px;
+    }
+    .score { font-size: 10px; color: var(--pink); text-shadow: 0 0 8px var(--pink); }
 
-    /* The list of things for the day */
+    /* ---- The lists ---- */
     .list {
       border-radius: var(--round);
-      padding: 8px 14px;
-      margin-bottom: 22px;
+      padding: 6px 12px;
+      margin-bottom: 12px;
     }
+
+    /* One row = 3 columns: [time] [name + duration] [check or icon] */
     .item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 0;
-      font-size: 16px;
-      cursor: pointer;
+      display: grid;
+      grid-template-columns: 42px 1fr 24px;
+      align-items: center;          /* everything lines up in the middle, top to bottom */
+      gap: 10px;
+      padding: 10px 0 10px 8px;
+      border-left: 3px solid transparent;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
-    /* The little "pop" when you check something off */
-    .item.done .check { animation: pop 0.25s ease-out; }
-    @keyframes pop { 50% { transform: scale(1.4); } }
-
-    /* The reverse: a little "shrink" when you uncheck it */
-    .item.undo .check { animation: unpop 0.25s ease-out; }
-    @keyframes unpop { 50% { transform: scale(0.7); } }
-
-    /* The score counter next to the date */
-    .date { display: flex; justify-content: space-between; align-items: center; }
-    .score { font-size: 10px; color: var(--pink); text-shadow: 0 0 8px var(--pink); }
     .item + .item { border-top: 1px solid rgba(41, 231, 255, 0.15); }
+
+    /* The thin colored stripe on the left shows where each thing came from */
+    .item.routine  { border-left-color: var(--cyan); }
+    .item.event    { border-left-color: var(--yellow); }
+    .item.task     { border-left-color: var(--pink); }
+    .item.reminder { border-left-color: var(--green); }
+
+    /* Start time on top, end time underneath */
+    .time { display: flex; flex-direction: column; font-size: 12px; line-height: 1.3; color: var(--cyan); }
+    .time .end { font-size: 11px; color: var(--dim); }
+    .item.reminder .time { color: var(--green); }
+
+    .name { font-size: 16px; transition: color 0.2s; }
+    .item.task .name, .item.task .time,
+    .item.reminder .name, .item.reminder .time { cursor: pointer; }
+    .dur  { display: inline-block; font-size: 11px; color: var(--purple); margin-left: 6px; vertical-align: middle; }
+
+    /* The right column: same size box for checks AND icons, so they line up */
+    .slot {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: var(--dim);
+    }
     .check {
       width: 18px;
       height: 18px;
       flex: none;
       border-radius: 5px;
       border: 2px solid var(--cyan);
+      cursor: pointer;
       transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;   /* colors fade instead of jumping */
     }
-    .item span { transition: color 0.2s; }
     .item.done .check { background: var(--pink); border-color: var(--pink); box-shadow: 0 0 8px var(--pink); }
-    .item.done span   { color: var(--dim); text-decoration: line-through; }
+    .item.done .name  { color: var(--dim); text-decoration: line-through; }
+    .item.done .dur   { text-decoration: line-through; opacity: 0.6; }
+
+    /* The little "pop" when you check something off, and "shrink" when you uncheck */
+    .item.done .check { animation: pop 0.25s ease-out; }
+    @keyframes pop { 50% { transform: scale(1.4); } }
+    .item.undo .check { animation: unpop 0.25s ease-out; }
+    @keyframes unpop { 50% { transform: scale(0.7); } }
+
+    /* Yellow dashed line between "no time" reminders and timed things.
+       The two numbers are: dash length (10px) and dash + gap (16px). */
+    .divider {
+      height: 2px;
+      margin: 6px 0;
+      background: repeating-linear-gradient(to right, var(--yellow) 0 10px, transparent 10px 16px);
+      filter: drop-shadow(0 0 3px var(--yellow));
+    }
+
+    .empty { color: var(--dim); font-size: 14px; text-align: center; padding: 14px 0; }
+
+    /* Date headings on the Reminders page */
+    .day-heading { font-size: 10px; color: var(--green); margin: 18px 0 8px; text-shadow: 0 0 6px var(--green); }
+    .day-heading:first-of-type { margin-top: 4px; }
+
+    /* The dashed "+ Add" buttons */
+    .add {
+      width: 100%;
+      margin-bottom: 22px;
+      padding: 12px;
+      border: 2px dashed var(--pink);
+      border-radius: var(--round);
+      background: none;
+      color: var(--pink);
+      font: inherit;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .add.green { border-color: var(--green); color: var(--green); }
 
     /* Widgets: a grid of 2 columns; "wide" ones take both columns */
     .widgets {
@@ -146,10 +216,127 @@
     .widget.wide { grid-column: span 2; }
     .widget .label { font-size: 10px; display: block; margin-bottom: 8px; }
     .widget .from  { font-size: 11px; color: var(--dim); display: block; margin-top: 6px; }
-
-    /* A little progress bar for the project widget */
     .progress { height: 10px; border-radius: 6px; background: rgba(41, 231, 255, 0.15); margin-top: 8px; overflow: hidden; }
     .progress div { height: 100%; width: 40%; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+
+    /* The "locked" screen for areas we haven't built yet */
+    .locked { border-radius: var(--round); padding: 30px 20px; margin-top: 30px; text-align: center; }
+    .locked i { font-size: 40px; color: var(--yellow); text-shadow: 0 0 10px var(--yellow); }
+    .locked .pixel { font-size: 12px; color: var(--yellow); margin: 16px 0 10px; }
+    .locked p { margin: 6px 0; color: var(--dim); }
+    .locked #locked-name { color: var(--text); font-size: 18px; }
+
+    /* ---- The pop-up panels ---- */
+    .sheet {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      background: rgba(5, 4, 15, 0.75);
+    }
+    .panel {
+      width: 100%;
+      max-width: 480px;
+      max-height: calc(100dvh - 24px);
+      overflow-y: auto;
+      margin: 12px;
+      margin-bottom: max(12px, env(safe-area-inset-bottom));
+      padding: 18px;
+      border-radius: 18px;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .panel h2 { font-size: 12px; color: var(--pink); margin: 0 0 4px; text-shadow: 0 0 8px var(--pink); }
+    .panel label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--cyan); }
+    .panel label small { color: var(--dim); font-size: 12px; }
+    .panel input, .panel select {
+      font: inherit;
+      font-size: 16px;               /* 16px stops iPhone from zooming in */
+      color: var(--text);
+      background: var(--field);
+      border: 2px solid rgba(41, 231, 255, 0.4);
+      border-radius: 10px;
+      padding: 10px 12px;
+      width: 100%;
+      min-height: 46px;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .panel input::-webkit-date-and-time-value { text-align: left; }
+    .panel input:focus, .panel select:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+    .panel input[type="time"]::-webkit-calendar-picker-indicator,
+    .panel input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+
+    /* The "Reminder" check in the add panel */
+    .kind-check {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--field);
+      border: 2px solid rgba(93, 255, 155, 0.4);
+      color: var(--text);
+      font: inherit;
+      font-size: 15px;
+      text-align: left;
+      cursor: pointer;
+    }
+    .kind-check .check { border-color: var(--green); }
+    .kind-check.on .check { background: var(--green); border-color: var(--green); box-shadow: 0 0 8px var(--green); }
+
+    /* An input with a little "×" button next to it, to empty it */
+    .with-clear { display: flex; gap: 8px; }
+    .with-clear input { flex: 1; }
+    .clear-btn {
+      flex: none;
+      width: 46px;
+      border-radius: 10px;
+      border: 2px solid rgba(41, 231, 255, 0.4);
+      background: var(--field);
+      color: var(--dim);
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .hint { font-size: 12px; color: var(--dim); margin: -4px 0 0; }
+
+    /* The "End time / Duration" switch */
+    .switch { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 4px; border-radius: 12px; background: var(--field); }
+    .switch button { font: inherit; font-size: 14px; padding: 8px; border: none; border-radius: 9px; background: none; color: var(--dim); cursor: pointer; }
+    .switch button.on { background: var(--cyan); color: var(--bg); box-shadow: 0 0 8px var(--cyan); }
+
+    .fields { display: flex; flex-direction: column; gap: 12px; }
+
+    .error { color: var(--red); font-size: 13px; margin: 0; }
+    .error:empty { display: none; }
+
+    .buttons { display: flex; gap: 8px; justify-content: flex-end; }
+    .buttons button { font: inherit; font-size: 14px; padding: 10px 16px; border-radius: 10px; background: none; border: 2px solid var(--dim); color: var(--text); cursor: pointer; }
+    .buttons .primary { border-color: var(--pink); color: var(--pink); box-shadow: 0 0 8px var(--pink); }
+    .buttons .danger  { border-color: var(--red); color: var(--red); margin-right: auto; }
+
+    /* ---- The "leftover quest" panel for unfinished things from past days ---- */
+    .panel .quest { font-size: 18px; margin: 0; }
+    .panel .quest-info { font-size: 13px; color: var(--dim); margin: 0; }
+    .choices { display: flex; flex-direction: column; gap: 8px; }
+    .choices > button {
+      display: flex; align-items: center; gap: 10px;
+      font: inherit; font-size: 15px; text-align: left;
+      padding: 12px 14px; border-radius: 12px;
+      background: var(--field); color: var(--text);
+      border: 2px solid rgba(41, 231, 255, 0.4); cursor: pointer;
+    }
+    .choices button i { font-size: 20px; }
+    .choices .c-today i { color: var(--pink); }
+    .choices .c-later i { color: var(--yellow); }
+    .choices .c-drop  i { color: var(--dim); }
+    .later-row { display: flex; gap: 8px; }
+    .later-row input { flex: 1; }
+    .counter { font-size: 10px; color: var(--dim); align-self: flex-end; }
   </style>
 </head>
 
@@ -157,125 +344,612 @@
   <!-- ========== PART 3: THE "BODY" (HTML) ==========
        This is WHAT is on the screen, from top to bottom. -->
 
-  <!-- TOP BAR: 5 buttons -->
+  <!-- TOP BAR: 5 buttons. "data-page" says which page each button opens. -->
   <nav class="bar top glow-pink">
-    <button class="tab active"><i class="ti ti-home"></i>Home</button>
-    <button class="tab"><i class="ti ti-calendar"></i>Calendar</button>
-    <button class="tab"><i class="ti ti-book"></i>Journal</button>
-    <button class="tab"><i class="ti ti-bell"></i>Reminders</button>
-    <button class="tab"><i class="ti ti-notes"></i>Daily log</button>
+    <button class="tab active" data-page="home"><i class="ti ti-home"></i>Home</button>
+    <button class="tab" data-page="calendar"><i class="ti ti-calendar"></i>Calendar</button>
+    <button class="tab" data-page="journal"><i class="ti ti-book"></i>Journal</button>
+    <button class="tab" data-page="reminders"><i class="ti ti-bell"></i>Reminders</button>
+    <button class="tab" data-page="dailylog"><i class="ti ti-notes"></i>Daily log</button>
   </nav>
 
-  <!-- MIDDLE: the part that scrolls -->
-  <main>
-    <h1 class="day-title pixel">DAY 1-UP</h1>
-    <p class="date">
-      <span id="today"></span>
-      <span id="score" class="score pixel"></span>
-    </p>
+  <!-- MIDDLE: the part that scrolls. Each "section" is one page; only one shows at a time. -->
+  <main id="main">
 
-    <!-- List of things for the day. It starts EMPTY here:
-         the script at the bottom fills it in. -->
-    <div class="list glow-cyan" id="day-list"></div>
+    <!-- PAGE: HOME -->
+    <section id="page-home">
+      <h1 class="page-title pixel">DAY 1-UP</h1>
+      <p class="date">
+        <span id="today"></span>
+        <span id="score" class="score pixel"></span>
+      </p>
 
-    <!-- Widgets (examples: each will come from its own page later) -->
-    <div class="widgets">
-      <div class="widget wide glow-pink">
-        <span class="label pixel" style="color: var(--pink)">NEXT UP</span>
-        Unreal lesson · 18:00
-        <span class="from">from Reminders</span>
+      <!-- The day list. It starts EMPTY here: the script fills it in. -->
+      <div class="list glow-cyan" id="day-list"></div>
+      <button class="add" id="add-btn"><i class="ti ti-plus"></i> Add to today</button>
+
+      <!-- Widgets (examples: each will come from its own page later) -->
+      <div class="widgets">
+        <div class="widget wide glow-pink">
+          <span class="label pixel" style="color: var(--pink)">NEXT UP</span>
+          Unreal lesson · 18:00
+          <span class="from">from Reminders</span>
+        </div>
+        <div class="widget glow-yellow">
+          <span class="label pixel" style="color: var(--yellow)">STREAK</span>
+          3 days
+          <span class="from">from Trackers</span>
+        </div>
+        <div class="widget glow-cyan">
+          <span class="label pixel" style="color: var(--cyan)">WATER</span>
+          4 / 8
+          <span class="from">from Trackers</span>
+        </div>
+        <div class="widget wide glow-cyan">
+          <span class="label pixel" style="color: var(--cyan)">QUEST</span>
+          Portfolio project
+          <div class="progress"><div></div></div>
+          <span class="from">from Projects</span>
+        </div>
+        <div class="widget glow-pink">
+          <span class="label pixel" style="color: var(--pink)">WORKOUT</span>
+          Legs day
+          <span class="from">from Fitness</span>
+        </div>
+        <div class="widget glow-yellow">
+          <span class="label pixel" style="color: var(--yellow)">WATCHING</span>
+          Episode 4
+          <span class="from">from Binging</span>
+        </div>
       </div>
-      <div class="widget glow-yellow">
-        <span class="label pixel" style="color: var(--yellow)">STREAK</span>
-        3 days
-        <span class="from">from Trackers</span>
+    </section>
+
+    <!-- PAGE: REMINDERS -->
+    <section id="page-reminders" class="hidden">
+      <h1 class="page-title pixel" style="color: var(--green); text-shadow: 0 0 10px var(--green)">REMINDERS</h1>
+      <p class="date"><span>Today and coming up</span></p>
+      <div id="reminders-list"></div>
+      <button class="add green" id="add-reminder-btn"><i class="ti ti-plus"></i> Add reminder</button>
+    </section>
+
+    <!-- PAGE: LOCKED (for every area we haven't built yet) -->
+    <section id="page-locked" class="hidden">
+      <div class="locked glow-yellow">
+        <i class="ti ti-lock"></i>
+        <p class="pixel">LOCKED</p>
+        <p id="locked-name"></p>
+        <p>This area unlocks in a future level.</p>
       </div>
-      <div class="widget glow-cyan">
-        <span class="label pixel" style="color: var(--cyan)">WATER</span>
-        4 / 8
-        <span class="from">from Trackers</span>
-      </div>
-      <div class="widget wide glow-cyan">
-        <span class="label pixel" style="color: var(--cyan)">QUEST</span>
-        Portfolio project
-        <div class="progress"><div></div></div>
-        <span class="from">from Projects</span>
-      </div>
-      <div class="widget glow-pink">
-        <span class="label pixel" style="color: var(--pink)">WORKOUT</span>
-        Legs day
-        <span class="from">from Fitness</span>
-      </div>
-      <div class="widget glow-yellow">
-        <span class="label pixel" style="color: var(--yellow)">WATCHING</span>
-        Episode 4
-        <span class="from">from Binging</span>
-      </div>
-    </div>
+    </section>
   </main>
 
   <!-- BOTTOM BAR: 5 buttons -->
   <nav class="bar bottom glow-pink">
-    <button class="tab"><i class="ti ti-barbell"></i>Fitness</button>
-    <button class="tab"><i class="ti ti-target"></i>Trackers</button>
-    <button class="tab"><i class="ti ti-folder"></i>Projects</button>
-    <button class="tab"><i class="ti ti-device-tv"></i>Binging</button>
-    <button class="tab"><i class="ti ti-dots"></i>More</button>
+    <button class="tab" data-page="fitness"><i class="ti ti-barbell"></i>Fitness</button>
+    <button class="tab" data-page="trackers"><i class="ti ti-target"></i>Trackers</button>
+    <button class="tab" data-page="projects"><i class="ti ti-folder"></i>Projects</button>
+    <button class="tab" data-page="binging"><i class="ti ti-device-tv"></i>Binging</button>
+    <button class="tab" data-page="more"><i class="ti ti-dots"></i>More</button>
   </nav>
 
+  <!-- POP-UP PANEL for adding or editing a task or reminder (hidden until you need it) -->
+  <div class="sheet hidden" id="sheet">
+    <form class="panel glow-pink" id="item-form" novalidate>
+      <h2 class="pixel" id="sheet-title">NEW TASK</h2>
+
+      <label>Name
+        <input id="f-name" type="text" placeholder="Unreal homework" autocomplete="off">
+      </label>
+
+      <!-- The "Reminder" check: on = reminder, off = task -->
+      <button type="button" class="kind-check" id="f-reminder">
+        <span class="check"></span>
+        <span>Reminder</span>
+      </button>
+
+      <!-- Fields for a TASK: start, then end time or duration -->
+      <div class="fields" id="task-fields">
+        <label>Start
+          <input id="f-start" type="time">
+        </label>
+
+        <div class="switch">
+          <button type="button" id="mode-end" class="on">End time</button>
+          <button type="button" id="mode-dur">Duration</button>
+        </div>
+
+        <label id="wrap-end">End
+          <input id="f-end" type="time">
+        </label>
+        <label id="wrap-dur" class="hidden">Duration
+          <select id="f-dur"></select>
+        </label>
+      </div>
+
+      <!-- Fields for a REMINDER: date and time, both optional -->
+      <div class="fields hidden" id="reminder-fields">
+        <label><span>Date <small>(optional)</small></span>
+          <span class="with-clear">
+            <input id="f-date" type="date">
+            <button type="button" class="clear-btn" data-clear="f-date" aria-label="Clear date">×</button>
+          </span>
+        </label>
+        <label><span>Time <small>(optional)</small></span>
+          <span class="with-clear">
+            <input id="f-time" type="time">
+            <button type="button" class="clear-btn" data-clear="f-time" aria-label="Clear time">×</button>
+          </span>
+        </label>
+        <p class="hint">No date: today. No time: at the top of the list.</p>
+      </div>
+
+      <p class="error" id="f-error"></p>
+
+      <div class="buttons">
+        <button type="button" class="danger hidden" id="btn-delete">Delete</button>
+        <button type="button" id="btn-cancel">Cancel</button>
+        <button type="submit" class="primary">Save</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- POP-UP PANEL for unfinished things from past days (hidden until needed) -->
+  <div class="sheet hidden" id="leftover-sheet">
+    <div class="panel glow-yellow">
+      <span class="counter pixel" id="lo-counter"></span>
+      <h2 class="pixel" style="color: var(--yellow); text-shadow: 0 0 8px var(--yellow)">LEFTOVER QUEST</h2>
+      <p class="quest" id="lo-name"></p>
+      <p class="quest-info" id="lo-info"></p>
+
+      <div class="choices">
+        <button type="button" class="c-today" id="lo-today"><i class="ti ti-arrow-right"></i>Move to today</button>
+        <button type="button" class="c-later" id="lo-later"><i class="ti ti-calendar-plus"></i>Move to another day</button>
+        <div class="hidden" id="lo-later-row">
+          <div class="later-row buttons">
+            <input type="date" id="lo-date">
+            <button type="button" class="primary" id="lo-date-ok">Move</button>
+          </div>
+          <p class="error" id="lo-error"></p>
+        </div>
+        <button type="button" class="c-drop" id="lo-drop"><i class="ti ti-x"></i>Mark as not done</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ========== PART 4: THE "SCRIPT" (JavaScript) ==========
-       This is what the app DOES: filling in the date, reacting to taps. -->
+       This is what the app DOES. -->
   <script>
-    // STEP 1: Write today's date automatically
-    const today = new Date();
-    document.getElementById('today').textContent =
-      today.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-
-    // STEP 2: The list for the day.
-    // Each task has its text, and "done" is true (checked) or false (not yet).
-    const dayList = [
-      { text: 'Work 7:30–15:00', done: true },
-      { text: 'Laundry', done: false },
-      { text: 'Unreal lesson', done: false },
-      { text: 'Walk 20 min', done: false }
-    ];
-
-    // STEP 3: Update the score, like "CLEAR 1/4"
-    function updateScore() {
-      const doneCount = dayList.filter(function (task) { return task.done; }).length;
-      document.getElementById('score').textContent = 'CLEAR ' + doneCount + '/' + dayList.length;
+    // STEP 1: Little helpers for dates and times
+    // A date as text like "2026-09-29", so each item knows which day it belongs to
+    function dateKey(d) {
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     }
+    function todayKey() { return dateKey(new Date()); }
+    // "2026-09-28" → "Monday, Sep 28"
+    function niceDate(key) {
+      const parts = key.split('-');
+      const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      return d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+    }
+    // "18:30" → 1110 minutes since midnight (easier to do math with)
+    function toMinutes(time) {
+      const parts = time.split(':');
+      return Number(parts[0]) * 60 + Number(parts[1]);
+    }
+    // 1110 minutes → "18:30"
+    function toTime(minutes) {
+      return String(Math.floor(minutes / 60)).padStart(2, '0') + ':' + String(minutes % 60).padStart(2, '0');
+    }
+    // 90 minutes → "1h 30m"
+    function durationText(minutes) {
+      const h = Math.floor(minutes / 60);
+      const m = minutes % 60;
+      if (h && m) return h + 'h ' + m + 'm';
+      if (h) return h + 'h';
+      return m + 'm';
+    }
+    function sortByTime(a, b) { return toMinutes(a.data.start) - toMinutes(b.data.start); }
 
-    // STEP 4: Draw every task on the screen
-    function drawList() {
-      const box = document.getElementById('day-list');
-      box.innerHTML = '';                                   // empty the box first
+    // STEP 2: The app's memory, saved on this device.
+    // ONE list holds both tasks and reminders. Each one has a "type": 'task' or 'reminder'.
+    // Home and the Reminders page both read this same list, so they always match.
+    function load(name) {
+      try { return JSON.parse(localStorage.getItem(name)) || []; }
+      catch (e) { return []; }
+    }
+    function save(name, data) {
+      try { localStorage.setItem(name, JSON.stringify(data)); }
+      catch (e) { }
+    }
+    let items = load('brainfog-tasks');
+    items.forEach(function (i) { if (!i.type) i.type = 'task'; });   // older tasks didn't have a type yet
+    function saveItems() { save('brainfog-tasks', items); }
 
-      dayList.forEach(function (task) {                     // for each task in the list...
-        const row = document.createElement('div');          // make a new row
-        row.className = task.done ? 'item done' : 'item';   // checked or not?
-        row.innerHTML = '<div class="check"></div><span></span>';
-        row.querySelector('span').textContent = task.text;  // put the task's words in
+    // STEP 3: TEMPORARY examples, just to see the layout.
+    // Level 4 replaces the routine, and Level 5 the events.
+    const demoRoutine = [ { name: 'Work', start: '07:30', end: '15:00' } ];
+    const demoEvents  = [ { name: 'Dentist', start: '17:00', end: '17:45' } ];
 
-        // When you tap the row: flip done/not done, play the right animation, update the score
-        row.onclick = function () {
-          task.done = !task.done;
+    // STEP 4: Draw one row of a list
+    function makeRow(item) {
+      const row = document.createElement('div');
+      row.className = 'item ' + item.kind + (item.data.done ? ' done' : '');
+
+      // Left column: start and end time, only start for reminders, or a dash with no time
+      const time = document.createElement('div');
+      time.className = 'time';
+      if (item.data.start) {
+        time.innerHTML = '<span></span><span class="end"></span>';
+        time.children[0].textContent = item.data.start;
+        time.children[1].textContent = item.data.end || '';
+      } else {
+        time.textContent = '—';
+      }
+
+      // Middle column: the name, with the duration in small purple letters
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = item.data.name;
+      if (item.data.start && item.data.end) {
+        const dur = document.createElement('span');
+        dur.className = 'dur';
+        dur.textContent = durationText(toMinutes(item.data.end) - toMinutes(item.data.start));
+        name.appendChild(dur);
+      }
+
+      // Right column: an icon for routine and events, a check for tasks and reminders
+      const slot = document.createElement('div');
+      slot.className = 'slot';
+      if (item.kind === 'routine') {
+        slot.innerHTML = '<i class="ti ti-repeat"></i>';
+      } else if (item.kind === 'event') {
+        slot.innerHTML = '<i class="ti ti-calendar-event"></i>';
+      } else {
+        slot.innerHTML = '<div class="check"></div>';
+        slot.onclick = function () {
+          item.data.done = !item.data.done;
           row.classList.toggle('done');
           row.classList.remove('undo');
-          if (!task.done) {
-            row.classList.add('undo');   // just unchecked? play the "shrink" animation
-          }
+          if (!item.data.done) row.classList.add('undo');   // play the "shrink"
+          saveItems();
           updateScore();
         };
+        // Tapping the time or name opens it for editing
+        time.onclick = name.onclick = function () { openSheet(item.data); };
+      }
 
-        box.appendChild(row);                               // add the row to the screen
+      row.append(time, name, slot);
+      return row;
+    }
+
+    // STEP 5: Everything for one day, split into "no time" (top) and "timed" (sorted by time)
+    function itemsForDay(key) {
+      const untimed = [];
+      const timed = [];
+      if (key === todayKey()) {
+        demoRoutine.forEach(function (r) { timed.push({ kind: 'routine', data: r }); });
+        demoEvents.forEach(function (e) { timed.push({ kind: 'event', data: e }); });
+      }
+      items.forEach(function (i) {
+        if (i.date !== key || i.dropped) return;
+        const entry = { kind: i.type, data: i };
+        if (i.start) timed.push(entry); else untimed.push(entry);
       });
+      timed.sort(sortByTime);
+      return { untimed: untimed, timed: timed };
+    }
 
+    // Draw a day's list into a box, with the yellow dashed line between the two parts
+    function fillList(box, day) {
+      box.innerHTML = '';
+      day.untimed.forEach(function (entry) { box.appendChild(makeRow(entry)); });
+      if (day.untimed.length && day.timed.length) {
+        const line = document.createElement('div');
+        line.className = 'divider';
+        box.appendChild(line);
+      }
+      day.timed.forEach(function (entry) { box.appendChild(makeRow(entry)); });
+    }
+
+    // STEP 6: The HOME list
+    function drawHome() {
+      const box = document.getElementById('day-list');
+      const day = itemsForDay(todayKey());
+      fillList(box, day);
+      if (!day.untimed.length && !day.timed.length) {
+        box.innerHTML = '<div class="empty">Nothing yet. Tap "Add to today" below.</div>';
+      }
       updateScore();
     }
 
-    // STEP 5: Start everything
-    drawList();
+    // The score only counts things that have a check
+    function updateScore() {
+      const day = itemsForDay(todayKey());
+      const checkable = day.untimed.concat(day.timed).filter(function (e) {
+        return e.kind === 'task' || e.kind === 'reminder';
+      });
+      const done = checkable.filter(function (e) { return e.data.done; }).length;
+      document.getElementById('score').textContent = checkable.length ? 'CLEAR ' + done + '/' + checkable.length : '';
+    }
+
+    // STEP 7: The REMINDERS page: every reminder from today on, grouped by day
+    function drawReminders() {
+      const page = document.getElementById('reminders-list');
+      page.innerHTML = '';
+
+      // Find every day that has a reminder, from today onwards
+      const days = [];
+      items.forEach(function (i) {
+        if (i.type === 'reminder' && !i.dropped && i.date >= todayKey() && days.indexOf(i.date) === -1) days.push(i.date);
+      });
+      days.sort();
+
+      if (!days.length) {
+        page.innerHTML = '<div class="list glow-cyan"><div class="empty">No reminders yet. Tap "Add reminder" below.</div></div>';
+        return;
+      }
+
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      days.forEach(function (key) {
+        const heading = document.createElement('h2');
+        heading.className = 'day-heading pixel';
+        heading.textContent = key === todayKey() ? 'TODAY' : key === dateKey(tomorrow) ? 'TOMORROW' : niceDate(key).toUpperCase();
+        page.appendChild(heading);
+
+        // Only the reminders of that day (no routine, events or tasks here)
+        const all = itemsForDay(key);
+        const onlyReminders = {
+          untimed: all.untimed.filter(function (e) { return e.kind === 'reminder'; }),
+          timed:   all.timed.filter(function (e) { return e.kind === 'reminder'; })
+        };
+        const box = document.createElement('div');
+        box.className = 'list glow-cyan';
+        fillList(box, onlyReminders);
+        page.appendChild(box);
+      });
+    }
+
+    // STEP 8: Switching pages with the bar buttons
+    const pageNames = {
+      calendar: 'Calendar', journal: 'Journal', dailylog: 'Daily log', fitness: 'Fitness',
+      trackers: 'Trackers', projects: 'Projects', binging: 'Binging', more: 'More'
+    };
+    let currentPage = 'home';
+
+    function showPage(page) {
+      currentPage = page;
+      document.querySelectorAll('.tab').forEach(function (tab) {
+        tab.classList.toggle('active', tab.dataset.page === page);
+      });
+      document.getElementById('page-home').classList.toggle('hidden', page !== 'home');
+      document.getElementById('page-reminders').classList.toggle('hidden', page !== 'reminders');
+      document.getElementById('page-locked').classList.toggle('hidden', page === 'home' || page === 'reminders');
+
+      if (page === 'home') drawHome();
+      else if (page === 'reminders') drawReminders();
+      else document.getElementById('locked-name').textContent = pageNames[page];
+
+      document.getElementById('main').scrollTop = 0;
+    }
+    document.querySelectorAll('.tab').forEach(function (tab) {
+      tab.onclick = function () { showPage(tab.dataset.page); };
+    });
+
+    // Redraw whatever page is showing (after adding, editing or deleting)
+    function redraw() {
+      if (currentPage === 'reminders') drawReminders(); else drawHome();
+    }
+
+    // STEP 9: The pop-up panel for adding and editing tasks and reminders
+    const sheet = document.getElementById('sheet');
+    const form = document.getElementById('item-form');
+    const errorText = document.getElementById('f-error');
+    let editing = null;       // the item being edited, or null when adding a new one
+    let isReminder = false;   // is the "Reminder" check on?
+    let mode = 'end';         // "end" = you type the end time, "dur" = you pick a duration
+
+    function field(id) { return document.getElementById(id); }
+
+    // Fill the duration list: 15m, 30m, 45m ... up to 8h
+    for (let m = 15; m <= 480; m += 15) {
+      const option = document.createElement('option');
+      option.value = m;
+      option.textContent = durationText(m);
+      field('f-dur').appendChild(option);
+    }
+
+    function setMode(newMode) {
+      mode = newMode;
+      field('mode-end').classList.toggle('on', mode === 'end');
+      field('mode-dur').classList.toggle('on', mode === 'dur');
+      field('wrap-end').classList.toggle('hidden', mode !== 'end');
+      field('wrap-dur').classList.toggle('hidden', mode !== 'dur');
+      errorText.textContent = '';
+    }
+    field('mode-end').onclick = function () { setMode('end'); };
+    field('mode-dur').onclick = function () { setMode('dur'); };
+
+    // Turn the "Reminder" check on or off, and show the matching fields
+    function setReminder(on) {
+      isReminder = on;
+      field('f-reminder').classList.toggle('on', on);
+      field('task-fields').classList.toggle('hidden', on);
+      field('reminder-fields').classList.toggle('hidden', !on);
+      const word = on ? 'REMINDER' : 'TASK';
+      field('sheet-title').textContent = (editing ? 'EDIT ' : 'NEW ') + word;
+      errorText.textContent = '';
+    }
+    field('f-reminder').onclick = function () { setReminder(!isReminder); };
+
+    // The little "×" buttons empty their box
+    document.querySelectorAll('.clear-btn').forEach(function (btn) {
+      btn.onclick = function () { field(btn.dataset.clear).value = ''; errorText.textContent = ''; };
+    });
+
+    function openSheet(item, startAsReminder) {
+      editing = item || null;
+      setMode('end');
+      field('btn-delete').classList.toggle('hidden', !editing);
+
+      // Suggest a start time for new tasks: the next quarter hour from now, lasting 1 hour
+      const now = new Date();
+      let start = Math.ceil((now.getHours() * 60 + now.getMinutes()) / 15) * 15;
+      if (start > 22 * 60 + 45) start = 22 * 60 + 45;
+
+      field('f-name').value = editing ? editing.name : '';
+      field('f-start').value = editing && editing.start ? editing.start : toTime(start);
+      field('f-end').value = editing && editing.end ? editing.end : toTime(Math.min(start + 60, 23 * 60 + 59));
+      field('f-dur').value = 60;
+      field('f-date').value = editing ? editing.date : '';
+      field('f-time').value = editing && editing.start ? editing.start : '';
+      field('f-date').min = todayKey();
+
+      setReminder(editing ? editing.type === 'reminder' : !!startAsReminder);
+      sheet.classList.remove('hidden');
+    }
+
+    function closeSheet() {
+      sheet.classList.add('hidden');
+      editing = null;
+    }
+
+    field('add-btn').onclick = function () { openSheet(null, false); };
+    field('add-reminder-btn').onclick = function () { openSheet(null, true); };
+    field('btn-cancel').onclick = closeSheet;
+    sheet.onclick = function (e) { if (e.target === sheet) closeSheet(); };   // tap outside to close
+    form.oninput = function () { errorText.textContent = ''; };
+
+    // When you press Save: check everything, then add or update the item
+    form.onsubmit = function (e) {
+      e.preventDefault();
+      const name = field('f-name').value.trim();
+      if (!name) { errorText.textContent = 'Give it a name.'; return; }
+
+      let date, start, end;
+
+      if (isReminder) {
+        // No date → today. No time → it goes at the top of that day's list.
+        date = field('f-date').value || todayKey();
+        start = field('f-time').value || '';
+        end = '';
+        if (date < todayKey() && !(editing && editing.date === date)) {
+          errorText.textContent = 'Pick today or a later day.'; return;
+        }
+      } else {
+        date = editing ? editing.date : todayKey();
+        start = field('f-start').value;
+        if (!start) { errorText.textContent = 'Pick a start time.'; return; }
+        if (mode === 'end') {
+          end = field('f-end').value;
+          if (!end) { errorText.textContent = 'Pick an end time.'; return; }
+        } else {
+          const endMinutes = toMinutes(start) + Number(field('f-dur').value);
+          if (endMinutes >= 24 * 60) { errorText.textContent = 'That goes past midnight. Pick a shorter duration.'; return; }
+          end = toTime(endMinutes);
+        }
+        if (toMinutes(end) <= toMinutes(start)) { errorText.textContent = 'The end has to be after the start.'; return; }
+      }
+
+      const type = isReminder ? 'reminder' : 'task';
+      if (editing) {
+        editing.type = type;
+        editing.name = name;
+        editing.date = date;
+        editing.start = start;
+        editing.end = end;
+      } else {
+        items.push({ id: Date.now(), type: type, name: name, date: date, start: start, end: end, done: false });
+      }
+      saveItems();
+      closeSheet();
+      redraw();
+    };
+
+    field('btn-delete').onclick = function () {
+      items = items.filter(function (i) { return i !== editing; });
+      saveItems();
+      closeSheet();
+      redraw();
+    };
+
+    // STEP 10: Leftover quests: unfinished tasks and reminders from past days.
+    // They never disappear on their own: you choose to move them or mark them as not done.
+    const leftoverSheet = field('leftover-sheet');
+    let leftovers = [];      // the unfinished things still waiting for an answer
+    let leftoverTotal = 0;
+
+    function checkLeftovers() {
+      leftovers = items.filter(function (i) { return i.date < todayKey() && !i.done && !i.dropped; });
+      leftoverTotal = leftovers.length;
+      showNextLeftover();
+    }
+
+    function showNextLeftover() {
+      if (!leftovers.length) {
+        leftoverSheet.classList.add('hidden');
+        redraw();
+        return;
+      }
+      const i = leftovers[0];
+      let info = 'From ' + niceDate(i.date);
+      if (i.start) info += ', ' + i.start + (i.end ? '–' + i.end : '');
+      field('lo-counter').textContent = (leftoverTotal - leftovers.length + 1) + '/' + leftoverTotal;
+      field('lo-name').textContent = i.name;
+      field('lo-info').textContent = info;
+      field('lo-later-row').classList.add('hidden');
+      field('lo-error').textContent = '';
+
+      // The date picker only allows days after today (today has its own button)
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      field('lo-date').min = dateKey(tomorrow);
+      field('lo-date').value = dateKey(tomorrow);
+
+      leftoverSheet.classList.remove('hidden');
+    }
+
+    // Answer for the current leftover, then save and show the next one
+    function answerLeftover(change) {
+      change(leftovers[0]);
+      saveItems();
+      leftovers.shift();
+      showNextLeftover();
+    }
+
+    field('lo-today').onclick = function () {
+      answerLeftover(function (i) { i.date = todayKey(); });
+    };
+    field('lo-later').onclick = function () {
+      field('lo-later-row').classList.toggle('hidden');
+    };
+    field('lo-date').oninput = function () { field('lo-error').textContent = ''; };
+    field('lo-date-ok').onclick = function () {
+      const picked = field('lo-date').value;
+      if (!picked) { field('lo-error').textContent = 'Pick a date.'; return; }
+      if (picked <= todayKey()) { field('lo-error').textContent = 'Pick a day after today.'; return; }
+      answerLeftover(function (i) { i.date = picked; });
+    };
+    field('lo-drop').onclick = function () {
+      answerLeftover(function (i) { i.dropped = true; });   // kept in the history as "not done"
+    };
+
+    // STEP 11: Start everything
+    let shownDay = '';
+    function start() {
+      shownDay = todayKey();
+      field('today').textContent =
+        new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+      redraw();
+      checkLeftovers();
+    }
+    start();
+
+    // If the app stays open overnight, start again with the new day when you come back to it
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'visible' && todayKey() !== shownDay) start();
+    });
   </script>
 </body>
 </html>
