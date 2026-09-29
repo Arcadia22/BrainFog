@@ -296,8 +296,8 @@
       -webkit-tap-highlight-color: transparent;
     }
     .widget.small  { grid-column: span 1; aspect-ratio: 1 / 1; }
-    .widget.medium { grid-column: span 3; aspect-ratio: 358 / 115; }
-    .widget.large  { grid-column: span 3; aspect-ratio: 358 / 170; }
+    .widget.medium { grid-column: span 3; aspect-ratio: 358 / 174; }
+    .widget.large  { grid-column: span 3; aspect-ratio: 358 / 215; }
     .widget .wtitle { font-family: 'Press Start 2P', monospace; font-size: 7px; color: var(--c); display: flex; align-items: center; gap: 5px; margin: 0 0 2px; }
     .widget .wtitle i { font-size: 12px; }
     .widget .wempty { color: var(--dim); font-size: 12px; margin: auto 0; }
@@ -334,6 +334,10 @@
     .wmonth .t.ev::after { background: var(--bg); }
     .wsplit .wrow { font-size: 13px; padding: 2px 0; }
     .wsplit .wrow .ww { font-size: 10px; }
+
+
+    .wbar { height: 5px; margin: -1px 0 3px; }
+    .widget.small .wrow.wshort .ww { order: 0; }
 
     /* widget chooser panel */
     .w-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 12px; background: var(--field); }
@@ -375,6 +379,72 @@
     .more-box { border-radius: var(--round); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
     .more-title { font-size: 10px; margin: 0; display: flex; align-items: center; gap: 6px; }
     .more-title i { font-size: 16px; }
+
+
+    /* ---- Projects and Chores ---- */
+    .add.purple { border-color: var(--purple); color: var(--purple); }
+    .chip.proj-chip { background: rgba(181, 156, 255, 0.18); color: var(--purple); }
+    .sect-title { font-size: 9px; color: var(--purple); margin: 18px 0 8px; }
+    .proj-card {
+      width: 100%; text-align: left; font: inherit; color: var(--text); cursor: pointer;
+      background: var(--bg); border: 2px solid var(--purple); border-radius: var(--round);
+      box-shadow: 0 0 6px rgba(181, 156, 255, 0.6); padding: 12px; margin-bottom: 10px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .proj-card .pc-top { display: flex; align-items: baseline; gap: 8px; }
+    .proj-card .pc-name { font-size: 17px; font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .proj-card .pc-due, .proj-due { font-size: 12px; color: var(--cyan); }
+    .proj-card .pc-sub { font-size: 13px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .late { color: var(--red) !important; }
+    .progress { height: 8px; border-radius: 6px; background: rgba(181, 156, 255, 0.15); overflow: hidden; }
+    .progress div { height: 100%; width: 0; background: var(--purple); box-shadow: 0 0 8px var(--purple); transition: width 0.3s; }
+    .proj-head { border: 2px solid var(--purple); border-radius: var(--round); box-shadow: 0 0 6px rgba(181, 156, 255, 0.6); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .proj-name { font-size: 22px; font-weight: 600; margin: 4px 0 0; }
+    .proj-due { margin: 0; }
+    .statb, .pimp, .cimp {
+      font: inherit; font-size: 14px; padding: 9px 2px; border-radius: 10px;
+      background: var(--field); color: var(--dim);
+      border: 2px solid rgba(143, 138, 184, 0.35); cursor: pointer;
+    }
+    .statb.on { color: var(--text); border-color: var(--purple); box-shadow: 0 0 8px rgba(181, 156, 255, 0.6); }
+    .pimp.on, .cimp.on { color: var(--text); border-color: var(--yellow); box-shadow: 0 0 8px rgba(255, 225, 77, 0.5); }
+    .pimp[data-imp="3"].on, .cimp[data-imp="3"].on { border-color: var(--pink); box-shadow: 0 0 8px var(--pink); }
+    #pd-status { grid-template-columns: repeat(3, 1fr); }
+    .notes-area {
+      width: 100%; font: inherit; font-size: 16px; color: var(--text); background: var(--field);
+      border: 2px solid rgba(181, 156, 255, 0.4); border-radius: 12px; padding: 10px 12px; resize: vertical;
+    }
+    .notes-area:focus { outline: none; border-color: var(--purple); box-shadow: 0 0 8px var(--purple); }
+    .upwhen.small { font-size: 11px; color: var(--cyan); }
+
+    /* chore rows: [when it's due] [name, how often, last done] [check] */
+    .item.chore-row { grid-template-columns: 58px 1fr 24px; border-left-color: var(--green); }
+    .chore-when { font-family: 'Press Start 2P', monospace; font-size: 7px; line-height: 1.5; color: var(--cyan); }
+    .chore-when.today { color: var(--yellow); }
+    .chore-when.late { color: var(--red); }
+    .chore-sub { display: block; font-size: 12px; color: var(--dim); margin-top: 2px; }
+    .item.chore-row .name { cursor: pointer; }
+    .item.chore-row.done .name { text-decoration: none; color: var(--dim); }
+
+    /* choices in the swap panel can have a small second line */
+    .choices > button small { display: block; font-size: 12px; color: var(--dim); margin-top: 2px; }
+    .choices > button .ctext { display: flex; flex-direction: column; min-width: 0; }
+
+
+    /* The More page: square section tiles, 4 in a row (like app icons) */
+    .tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 12px; }
+    .tile { width: 100%; align-self: start; background: none; border: none; padding: 0; font: inherit; color: var(--text); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; -webkit-tap-highlight-color: transparent; }
+    .tile .ticon {
+      --c: var(--cyan);
+      width: 100%; aspect-ratio: 1 / 1; border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--c); box-shadow: 0 0 6px var(--c), 0 0 16px rgba(0, 0, 0, 0.4);
+      background: rgba(41, 231, 255, 0.06);
+    }
+    .tile .ticon i { font-size: 30px; color: var(--c); text-shadow: 0 0 10px var(--c); }
+    .tile .tname { font-family: 'Press Start 2P', monospace; font-size: 7px; color: var(--c); }
+    .tile.soon .ticon { border-style: dashed; box-shadow: none; opacity: 0.55; }
+    .tile.soon .tname { color: var(--dim); }
 
     /* ---- The Suggestions panel ---- */
     .sugg-cat { display: flex; align-items: center; gap: 8px; font-size: 10px; margin: 8px 0 0; }
@@ -737,11 +807,12 @@
 
   <!-- TOP BAR: 5 buttons. "data-page" says which page each button opens. -->
   <nav class="bar top glow-pink">
+    <!-- Home is always first; the rest go in alphabetical order across both bars -->
     <button class="tab active" data-page="home"><i class="ti ti-home"></i>Home</button>
+    <button class="tab" data-page="binging"><i class="ti ti-device-tv"></i>Binging</button>
     <button class="tab" data-page="calendar"><i class="ti ti-calendar"></i>Calendar</button>
-    <button class="tab" data-page="journal"><i class="ti ti-book"></i>Journal</button>
-    <button class="tab" data-page="reminders"><i class="ti ti-bell"></i>Reminders</button>
     <button class="tab" data-page="dailylog"><i class="ti ti-notes"></i>Daily log</button>
+    <button class="tab" data-page="fitness"><i class="ti ti-barbell"></i>Fitness</button>
   </nav>
 
   <!-- MIDDLE: the part that scrolls. Each "section" is one page; only one shows at a time. -->
@@ -881,10 +952,18 @@
       <div id="record-list"></div>
     </section>
 
-    <!-- PAGE: MORE (Backup and Restore for now; more sections will live here later) -->
+    <!-- PAGE: MORE: a grid of extra sections, in alphabetical order (the script draws the tiles) -->
     <section id="page-more" class="hidden">
       <h1 class="page-title pixel" style="color: var(--purple); text-shadow: 0 0 10px var(--purple)">MORE</h1>
-      <p class="date"><span>Extra sections and settings</span></p>
+      <p class="date"><span>Extra sections</span></p>
+      <div class="tiles" id="more-tiles"></div>
+    </section>
+
+    <!-- PAGE: SETTINGS (reached from More) -->
+    <section id="page-settings" class="hidden">
+      <button type="button" class="small-btn back-btn" id="settings-back"><i class="ti ti-arrow-left"></i>More</button>
+      <h1 class="page-title pixel" style="color: var(--cyan); text-shadow: 0 0 10px var(--cyan)">SETTINGS</h1>
+      <p class="date"><span>Your app, your way</span></p>
 
       <div class="more-box glow-cyan">
         <p class="pixel more-title" style="color: var(--green)"><i class="ti ti-device-floppy"></i> SAVE FILE</p>
@@ -896,8 +975,62 @@
         <p class="hint" style="margin: 0">Restore <b style="color: var(--yellow)">replaces</b> everything on this device with what's in the backup file.</p>
         <input type="file" id="restore-file" class="hidden">
       </div>
+    </section>
 
-      <p class="hint" style="margin: 16px 0 0">Finances and other sections will live here later.</p>
+    <!-- PAGE: PROJECTS (a list of projects, and each project's own page) -->
+    <section id="page-projects" class="hidden">
+      <div id="proj-list-view">
+        <h1 class="page-title pixel" style="color: var(--purple); text-shadow: 0 0 10px var(--purple)">PROJECTS</h1>
+        <p class="date"><span>Most pressing first</span></p>
+        <div id="proj-list"></div>
+        <button type="button" class="add purple" id="proj-new"><i class="ti ti-plus"></i> New project</button>
+      </div>
+
+      <div id="proj-detail-view" class="hidden">
+        <button type="button" class="small-btn back-btn" id="proj-back"><i class="ti ti-arrow-left"></i>Projects</button>
+        <div class="proj-head">
+          <div class="title-row" style="margin: 0; align-items: flex-start">
+            <div>
+              <p class="detail-kind pixel" id="pd-kind"></p>
+              <h2 class="proj-name" id="pd-name"></h2>
+            </div>
+            <button type="button" class="small-btn" id="pd-edit"><i class="ti ti-pencil"></i>Edit</button>
+          </div>
+          <p class="proj-due" id="pd-due"></p>
+          <div class="progress"><div id="pd-bar"></div></div>
+          <p class="hint" id="pd-progress" style="margin: 0"></p>
+          <div class="reps" id="pd-status">
+            <button type="button" class="statb" data-status="active">Active</button>
+            <button type="button" class="statb" data-status="paused">Paused</button>
+            <button type="button" class="statb" data-status="done">Done</button>
+          </div>
+        </div>
+
+        <p class="pixel sect-title">NOTES</p>
+        <textarea id="pd-notes" class="notes-area" rows="4" placeholder="Ideas, links, what's next..."></textarea>
+
+        <p class="pixel sect-title">TO DO</p>
+        <div class="list glow-cyan" id="pd-todo"></div>
+        <button type="button" class="add purple" id="pd-add"><i class="ti ti-plus"></i> Add to this project</button>
+
+        <p class="pixel sect-title" id="pd-coming-title">COMING UP</p>
+        <div class="list glow-cyan" id="pd-coming"></div>
+
+        <div id="pd-record"></div>
+      </div>
+    </section>
+
+    <!-- PAGE: CHORES (reached from More) -->
+    <section id="page-chores" class="hidden">
+      <button type="button" class="small-btn back-btn" id="chores-back"><i class="ti ti-arrow-left"></i>More</button>
+      <h1 class="page-title pixel" style="color: var(--green); text-shadow: 0 0 10px var(--green)">CHORES</h1>
+      <p class="date"><span id="chore-sub">Most pressing first</span><span id="chore-score" class="score pixel" style="color: var(--green); text-shadow: none"></span></p>
+      <div class="seg">
+        <button type="button" class="on" id="cv-all">All</button>
+        <button type="button" id="cv-cat">By category</button>
+      </div>
+      <div id="chore-list"></div>
+      <button type="button" class="add green" id="chore-new"><i class="ti ti-plus"></i> New chore</button>
     </section>
 
     <!-- PAGE: LOCKED (for every area we haven't built yet) -->
@@ -913,10 +1046,11 @@
 
   <!-- BOTTOM BAR: 5 buttons -->
   <nav class="bar bottom glow-pink">
-    <button class="tab" data-page="fitness"><i class="ti ti-barbell"></i>Fitness</button>
-    <button class="tab" data-page="trackers"><i class="ti ti-target"></i>Trackers</button>
+    <button class="tab" data-page="journal"><i class="ti ti-book"></i>Journal</button>
     <button class="tab" data-page="projects"><i class="ti ti-folder"></i>Projects</button>
-    <button class="tab" data-page="binging"><i class="ti ti-device-tv"></i>Binging</button>
+    <button class="tab" data-page="reminders"><i class="ti ti-bell"></i>Reminders</button>
+    <button class="tab" data-page="trackers"><i class="ti ti-target"></i>Trackers</button>
+    <!-- More is always last -->
     <button class="tab" data-page="more"><i class="ti ti-dots"></i>More</button>
   </nav>
 
@@ -1021,6 +1155,12 @@
         </div>
       </div>
 
+      <!-- PROJECT: link it to one of your projects (optional) -->
+      <label id="f-project-wrap"><span>Project <small>(optional)</small></span>
+        <select id="f-project"></select>
+      </label>
+      <p class="hint" id="f-project-hint" style="margin: -4px 0 0">A project task with no date waits in the project until you plan it.</p>
+
       <!-- DETAILS: extra notes. Not shown on the Home list, but shown when you tap it -->
       <label><span>Details <small>(optional)</small></span>
         <textarea id="f-notes" rows="3" placeholder="Room 12, bring the blue folder"></textarea>
@@ -1064,11 +1204,108 @@
     </div>
   </div>
 
+  <!-- POP-UP PANEL: make or edit a project -->
+  <div class="sheet hidden" id="proj-sheet">
+    <form class="panel glow-pink" id="proj-form" novalidate>
+      <h2 class="pixel" id="proj-title" style="color: var(--purple); text-shadow: 0 0 8px var(--purple)">NEW PROJECT</h2>
+      <label>Name
+        <input id="p-name" type="text" placeholder="Portfolio website" autocomplete="off">
+      </label>
+      <div>
+        <p class="imp-label">Importance</p>
+        <div class="imps">
+          <button type="button" class="pimp" data-imp="0">None</button>
+          <button type="button" class="pimp" data-imp="1">★</button>
+          <button type="button" class="pimp" data-imp="2">★★</button>
+          <button type="button" class="pimp" data-imp="3">★★★</button>
+        </div>
+      </div>
+      <label><span>Due date <small>(optional)</small></span>
+        <span class="with-clear">
+          <input id="p-due" type="date">
+          <button type="button" class="clear-btn" data-clear="p-due" aria-label="Clear due date">×</button>
+        </span>
+      </label>
+      <p class="error" id="p-error"></p>
+      <div class="buttons">
+        <button type="button" class="danger hidden" id="p-delete">Delete</button>
+        <button type="button" id="p-cancel">Cancel</button>
+        <button type="submit" class="primary">Save</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- POP-UP PANEL: make or edit a chore -->
+  <div class="sheet hidden" id="chore-sheet">
+    <form class="panel glow-cyan" id="chore-form" novalidate>
+      <h2 class="pixel" id="chore-title" style="color: var(--green); text-shadow: 0 0 8px var(--green)">NEW CHORE</h2>
+      <label>Name
+        <input id="c-name" type="text" placeholder="Laundry" autocomplete="off">
+      </label>
+      <label>How long it takes
+        <select id="c-dur"></select>
+      </label>
+      <div>
+        <p class="imp-label">Importance</p>
+        <div class="imps">
+          <button type="button" class="cimp" data-imp="0">None</button>
+          <button type="button" class="cimp" data-imp="1">★</button>
+          <button type="button" class="cimp" data-imp="2">★★</button>
+          <button type="button" class="cimp" data-imp="3">★★★</button>
+        </div>
+      </div>
+      <!-- CATEGORY: the chores' own categories (like Kitchen, Bathroom) -->
+      <div>
+        <div class="label-row">
+          <p class="imp-label">Category</p>
+          <button type="button" class="link-btn" id="c-edit-cats">Edit categories</button>
+        </div>
+        <div class="opts" id="c-cats"></div>
+        <div class="new-cat hidden" id="c-newcat">
+          <div class="row">
+            <input id="c-ncname" type="text" placeholder="Kitchen" autocomplete="off">
+            <div class="buttons"><button type="button" class="primary" id="c-ncadd">Add</button></div>
+          </div>
+          <div class="swatches" id="c-nccolors"></div>
+        </div>
+      </div>
+      <div>
+        <p class="imp-label">When it comes back</p>
+        <div class="switch">
+          <button type="button" id="cm-every" class="on">Every X days</button>
+          <button type="button" id="cm-days">On set days</button>
+        </div>
+      </div>
+      <label id="c-every-wrap">Comes back
+        <select id="c-every"></select>
+      </label>
+      <div id="c-days-wrap" class="hidden">
+        <div class="days" id="c-days"></div>
+      </div>
+      <p class="hint" id="c-mode-hint" style="margin: -4px 0 0"></p>
+      <label><span>Last done <small>(optional)</small></span>
+        <span class="with-clear">
+          <input id="c-last" type="date">
+          <button type="button" class="clear-btn" data-clear="c-last" aria-label="Clear last done">×</button>
+        </span>
+      </label>
+      <label><span>Details <small>(optional)</small></span>
+        <textarea id="c-notes" rows="2" placeholder="Towels on 60°"></textarea>
+      </label>
+      <p class="error" id="c-error"></p>
+      <div class="buttons">
+        <button type="button" class="danger hidden" id="c-delete">Delete</button>
+        <button type="button" id="c-cancel">Cancel</button>
+        <button type="submit" class="primary">Save</button>
+      </div>
+    </form>
+  </div>
+
   <!-- POP-UP PANEL: Suggestions, grouped by category (hidden until needed) -->
   <div class="sheet hidden" id="sugg-sheet">
     <div class="panel glow-yellow">
       <h2 class="pixel" style="color: var(--yellow); text-shadow: 0 0 8px var(--yellow)">SUGGESTIONS</h2>
-      <p class="hint" style="margin: 0">Tap + to add it to today.</p>
+      <p class="hint" style="margin: 0">The 5 most pressing things you could do. Tap + to add one to today.</p>
       <div id="sugg-content"></div>
       <div class="buttons"><button type="button" id="sugg-close">Close</button></div>
     </div>
@@ -1166,7 +1403,7 @@
   <!-- POP-UP PANEL: edit your categories (add, rename, recolor, delete) -->
   <div class="sheet hidden" id="cat-sheet">
     <div class="panel glow-pink">
-      <h2 class="pixel">CATEGORIES</h2>
+      <h2 class="pixel" id="cat-sheet-title">CATEGORIES</h2>
       <p class="hint" style="margin: 0">Tap a color dot to change it. Changes save right away.</p>
       <div class="fields" id="cat-list"></div>
       <button type="button" class="add" style="margin: 0" id="cat-add"><i class="ti ti-plus"></i> Add category</button>
@@ -1222,6 +1459,16 @@
     // A unique name tag for each new thing, so two things never get mixed up
     let idCounter = 0;
     function newId() { return Date.now() + '-' + (idCounter++) + '-' + Math.random().toString(36).slice(2, 6); }
+
+    // Check something off (or back on). A task with no date gets today's date when you finish it,
+    // so it shows in the Record on the day you did it. A task made from a chore also marks the chore.
+    function toggleDone(i) {
+      i.done = !i.done;
+      if (i.done) i.dropped = false;
+      if (i.done && !i.date) i.date = todayKey();
+      if (i.chore && typeof setChoreDone === 'function') setChoreDone(i.chore, i.date || todayKey(), i.done);
+      saveItems();
+    }
 
     function sortByTime(a, b) { return toMinutes(a.data.start) - toMinutes(b.data.start); }
 
@@ -1301,7 +1548,7 @@
 
     // A short description like "Monday, Sep 28 · 18:00–19:30" or "Monday, Sep 28 · 45m"
     function whenText(i) {
-      let text = niceDate(i.date);
+      let text = i.date ? niceDate(i.date) : 'No date';   // project tasks can wait without a date
       if (i.start) text += ' · ' + i.start + (i.end ? '–' + i.end : '');
       else if (i.dur) text += ' · ' + durationText(i.dur);
       return text;
@@ -1370,6 +1617,7 @@
           name.insertBefore(chip, name.firstChild);
         }
         time.onclick = name.onclick = function () { showPage('calendar'); };   // change it in the routine
+        if (item.data.catId === 'chore' || item.data.catId === 'project') drawLinkedRow(row, name, slot, item.data);
       } else if (item.kind === 'event') {
         slot.innerHTML = '<i class="ti ti-calendar-event"></i>';
         const cat = catById(item.data.cat);
@@ -1392,15 +1640,32 @@
       } else {
         slot.innerHTML = '<div class="check"></div>';
         slot.onclick = function () {
-          item.data.done = !item.data.done;
+          toggleDone(item.data);
           row.classList.toggle('done');
           row.classList.remove('undo');
           if (!item.data.done) row.classList.add('undo');   // play the "shrink"
-          saveItems();
           updateScore();
         };
         // Tapping the time or name shows its details (and from there you can edit it)
         time.onclick = name.onclick = function () { openDetail(item.data); };
+      }
+
+      // In a project, show the date too (or "no date")
+      if (opts && opts.showDate) {
+        const d = opts.dateOverride || item.data.date;
+        const when = document.createElement('span');
+        when.className = 'upwhen small';
+        when.textContent = d ? (d === todayKey() ? 'Today' : d === daysFromToday(1) ? 'Tomorrow' : shortDate(parseKey(d))) : 'No date';
+        name.appendChild(when);
+      }
+
+      // Project: a small label with the project's name
+      const proj = item.data.project && typeof projectById === 'function' ? projectById(item.data.project) : null;
+      if (proj && item.kind !== 'routine' && !(opts && opts.hideProject)) {
+        const chip = document.createElement('span');
+        chip.className = 'chip proj-chip';
+        chip.textContent = proj.name.toUpperCase();
+        name.insertBefore(chip, name.firstChild);
       }
 
       // Details: a small note icon on the list; the details text itself only where asked
@@ -1434,6 +1699,23 @@
       });
       timed.sort(sortByTime);
       untimed.sort(function (a, b) { return byPressing(a.data, b.data); });   // most important on top
+
+      // CHORE and PROJECT blocks: fill each with a chore / a project's next task (different ones)
+      const usedChores = [];
+      const usedProjects = [];
+      timed.forEach(function (e) {
+        if (e.kind !== 'routine') return;
+        e.data.day = key;
+        if (e.data.catId === 'chore') e.data.link = pickChore(key, e.data.pid, usedChores);
+        if (e.data.catId === 'project') e.data.link = pickProject(key, e.data.pid, usedProjects);
+      });
+      // A project task already shown inside its Project block doesn't need its own row too
+      const inBlocks = timed.filter(function (e) { return e.data.link && e.data.link.task; })
+                            .map(function (e) { return e.data.link.task.id; });
+      if (inBlocks.length) {
+        const notInBlock = function (e) { return e.kind !== 'task' || inBlocks.indexOf(e.data.id) === -1; };
+        return { untimed: untimed.filter(notInBlock), timed: timed.filter(notInBlock) };
+      }
       return { untimed: untimed, timed: timed };
     }
 
@@ -1534,19 +1816,20 @@
 
     // STEP 8: Switching pages with the bar buttons
     const pageNames = {
-      calendar: 'Calendar', journal: 'Journal', dailylog: 'Daily log', fitness: 'Fitness',
+      calendar: 'Calendar', journal: 'Journal', dailylog: 'Daily log', fitness: 'Fitness', finance: 'Finance',
       trackers: 'Trackers', projects: 'Projects', binging: 'Binging', more: 'More'
     };
     let currentPage = 'home';
 
-    const builtPages = ['home', 'reminders', 'record', 'calendar', 'more'];   // pages that exist; the rest show "Locked"
+    const builtPages = ['home', 'reminders', 'record', 'calendar', 'more', 'projects', 'chores', 'settings'];   // pages that exist; the rest show "Locked"
 
     function showPage(page) {
       currentPage = page;
       document.querySelectorAll('.tab').forEach(function (tab) {
         // The Record page belongs to Home, so Home stays lit up there
         // The Record belongs to the page that opened it, so that page's button stays lit
-        tab.classList.toggle('active', tab.dataset.page === page || (page === 'record' && tab.dataset.page === recordFrom));
+        tab.classList.toggle('active', tab.dataset.page === page || (page === 'record' && tab.dataset.page === recordFrom)
+          || (MORE_SECTIONS.some(function (m) { return m.page === page; }) && tab.dataset.page === 'more'));   // sections live under More
       });
       builtPages.forEach(function (p) {
         document.getElementById('page-' + p).classList.toggle('hidden', page !== p);
@@ -1571,7 +1854,10 @@
       if (currentPage === 'reminders') drawReminders();
       else if (currentPage === 'record') drawRecord();
       else if (currentPage === 'calendar') drawCalendar();
-      else if (currentPage === 'more') drawMore();
+      else if (currentPage === 'more') drawMoreTiles();
+      else if (currentPage === 'settings') drawMore();
+      else if (currentPage === 'projects') drawProjects();
+      else if (currentPage === 'chores') drawChores();
       else drawHome();
     }
 
@@ -1638,7 +1924,7 @@
       const past = pool.filter(function (i) {
         if (recordFilter !== 'all' && i.type !== recordFilter) return false;
         if (i.type === 'event') return eventHappened(i);
-        return i.date < todayKey() || i.done;
+        return i.date && (i.date < todayKey() || i.done);   // things with no date aren't in the record
       });
 
       const days = [];
@@ -1840,12 +2126,13 @@
       btn.onclick = function () { field(btn.dataset.clear).value = ''; errorText.textContent = ''; };
     });
 
-    function openSheet(item, startKind, presetDate) {
+    function openSheet(item, startKind, presetDate, presetProject) {
       editing = item || null;
       field('btn-delete').classList.toggle('hidden', !editing);
 
       field('f-name').value  = editing ? editing.name : '';
       field('f-date').value  = editing ? editing.date : (presetDate || '');
+      fillProjectChoices(editing ? (editing.project || '') : (presetProject || ''));
       field('f-start').value = editing && editing.start ? editing.start : '';
       field('f-end').value   = editing && editing.end ? editing.end : '';
       field('f-dur').value   = editing ? lengthOf(editing) : 0;
@@ -1879,9 +2166,11 @@
       const name = field('f-name').value.trim();
       if (!name) { errorText.textContent = 'Give it a name.'; return; }
 
-      const date = field('f-date').value || todayKey();    // no date → today
+      // No date → today. But a project task or reminder with no date waits in its project.
+      const project = field('f-project').value;
+      const date = field('f-date').value || (project && kind !== 'event' ? '' : todayKey());
       const repeating = kind === 'event' && repeat;
-      if (date < todayKey() && !(editing && editing.date === date) && !repeating) {
+      if (date && date < todayKey() && !(editing && editing.date === date) && !repeating) {
         errorText.textContent = 'Pick today or a later day.'; return;
       }
 
@@ -1910,7 +2199,8 @@
                      imp: kind === 'event' ? 0 : importance,
                      cat: kind === 'event' ? eventCats.value : '',
                      notes: field('f-notes').value.trim(),
-                     repeat: kind === 'event' ? repeat : '' };
+                     repeat: kind === 'event' ? repeat : '',
+                     project: project };
       if (editing) {
         Object.assign(editing, data);
         if (kind === 'event') editing.done = false;   // events have no check
@@ -1963,6 +2253,13 @@
       }
       const stars = starsFor(i);
       if (stars) kindLine.appendChild(stars);
+      const proj = i.project ? projectById(i.project) : null;
+      if (proj) {
+        const chip = document.createElement('span');
+        chip.className = 'chip proj-chip';
+        chip.textContent = proj.name.toUpperCase();
+        kindLine.appendChild(chip);
+      }
 
       field('d-name').textContent = i.name;
       field('d-when').textContent = i.repeat
@@ -1992,9 +2289,7 @@
       openSheet(i);
     };
     field('d-check').onclick = function () {
-      detailItem.done = !detailItem.done;
-      if (detailItem.done) detailItem.dropped = false;
-      saveItems();
+      toggleDone(detailItem);
       closeDetail();
       redraw();
     };
@@ -2058,7 +2353,7 @@
     let leftoverTotal = 0;
 
     function checkLeftovers() {
-      leftovers = items.filter(function (i) { return i.type !== 'event' && i.date < todayKey() && !i.done && !i.dropped; });
+      leftovers = items.filter(function (i) { return i.type !== 'event' && i.date && i.date < todayKey() && !i.done && !i.dropped; });
       leftoverTotal = leftovers.length;
       showNextLeftover();
     }
@@ -2125,48 +2420,109 @@
       return dateKey(d);
     }
 
+    // Suggestions are ranked across all the categories, and only the 5 most pressing show.
+    // Each category says how pressing each thing is ("rank": smaller = more pressing,
+    // counted roughly in days until it's due; each ★ makes it half a day more pressing).
+    // So a chore due in 3 days still shows up when nothing more pressing is waiting.
+    const MAX_SUGGESTIONS = 5;
+    function daysUntil(key) { return Math.round((parseKey(key) - parseKey(todayKey())) / 86400000); }
+
     const categories = [
       {
         title: 'COMING UP', icon: 'ti-calendar-due', color: 'var(--yellow)',
-        empty: 'Nothing due in the next 7 days.',
-        // Tasks and reminders planned for the next 7 days
+        // Tasks and reminders planned for the next 2 weeks
         find: function () {
           return items.filter(function (i) {
-            return i.type !== 'event' && !i.done && !i.dropped && i.date > todayKey() && i.date <= daysFromToday(7);
-          }).sort(byPressing);   // most important first, then the closest date
+            return i.type !== 'event' && !i.done && !i.dropped && i.date > todayKey() && i.date <= daysFromToday(14);
+          });
         },
+        rank: function (i) { return daysUntil(i.date) - (i.imp || 0) * 0.5; },
         // "+" moves it to today
         add: function (i) { i.date = todayKey(); }
       },
       {
         title: 'NOT DONE BEFORE', icon: 'ti-rotate', color: 'var(--red)',
-        empty: 'Nothing left behind. Nice!',
-        // Things you marked as "not done" (the most recent 10, no repeats, not already on today)
+        // Things you marked as "not done" (no repeats, not already on today)
         find: function () {
           const seen = [];
           itemsForDay(todayKey()).untimed.concat(itemsForDay(todayKey()).timed).forEach(function (e) { seen.push(e.data.name); });
           return items.filter(function (i) { return i.dropped; })
-            .sort(function (a, b) { return ((b.imp || 0) - (a.imp || 0)) || (a.date > b.date ? -1 : 1); })   // most important, then most recent
+            .sort(function (a, b) { return a.date > b.date ? -1 : 1; })          // the most recent one of each
             .filter(function (i) {
               if (seen.indexOf(i.name) !== -1) return false;
               seen.push(i.name);
               return true;
-            }).slice(0, 10);
+            });
         },
+        rank: function (i) { return 1.5 - (i.imp || 0) * 0.5; },
         // "+" makes a fresh copy for today, so the Record still shows the old one as not done
         add: function (i) {
           items.push({ id: newId(), type: i.type, name: i.name, date: todayKey(), start: i.start, end: i.end, dur: i.dur || 0, done: false });
         }
       },
-      { title: 'CHORES',   icon: 'ti-bucket', color: 'var(--cyan)',   locked: 'Unlocks when we build Chores.' },
-      { title: 'PROJECTS', icon: 'ti-folder', color: 'var(--purple)', locked: 'Unlocks when we build Projects.' }
+      {
+        title: 'CHORES', icon: 'ti-bucket', color: 'var(--green)',
+        // Every chore not done today and not already on today's list (late ones rank first)
+        find: function () {
+          return chores.filter(function (c) {
+            return choreDays(c) !== 999 && !choreDoneOn(c, todayKey())
+              && !items.some(function (i) { return i.chore === c.id && i.date === todayKey(); });
+          });
+        },
+        rank: function (c) { return choreDays(c) - (c.imp || 0) * 0.5; },
+        info: function (c) { return 'Chore · ' + choreWhen(c).text.toLowerCase() + ' · ' + choreRepeatText(c); },
+        // "+" adds it to today as a task; checking that task marks the chore done
+        add: function (c) {
+          items.push({ id: newId(), type: 'task', name: c.name, date: todayKey(), start: '', end: '', dur: c.dur || 0, imp: c.imp || 0, chore: c.id, done: false });
+        }
+      },
+      {
+        title: 'PROJECTS', icon: 'ti-folder', color: 'var(--purple)',
+        // The next task of each active project that isn't planned for today yet
+        find: function () {
+          const out = [];
+          activeProjects().forEach(function (p) {
+            const t = projectItems(p).filter(function (i) {
+              return i.type === 'task' && !i.done && !i.dropped && (!i.date || i.date > todayKey());
+            }).sort(byPressing)[0];
+            if (t) out.push(t);
+          });
+          return out;
+        },
+        // Planned tasks count from their date; tasks with no date count from the project's due date
+        rank: function (t) {
+          const p = projectById(t.project);
+          const base = t.date ? daysUntil(t.date) : p.due ? Math.max(daysUntil(p.due) - 7, 1) : 6;
+          return base - Math.max(t.imp || 0, p.imp || 0) * 0.5;
+        },
+        info: function (t) { return projectById(t.project).name + ' · ' + (t.date ? whenText(t) : 'no date'); },
+        // "+" moves it to today
+        add: function (t) { t.date = todayKey(); }
+      }
     ];
 
     function drawSuggestions() {
       const box = field('sugg-content');
       box.innerHTML = '';
 
+      // Everything from every category, most pressing first, then keep the top 5
+      const all = [];
       categories.forEach(function (cat) {
+        cat.find().forEach(function (i) { all.push({ cat: cat, item: i, rank: cat.rank(i) }); });
+      });
+      all.sort(function (a, b) { return a.rank - b.rank; });
+      const top = all.slice(0, MAX_SUGGESTIONS);
+
+      if (!top.length) {
+        box.innerHTML = '<div class="sugg-list"><div class="sugg-empty">Nothing to suggest right now. Nice!</div></div>';
+        return;
+      }
+
+      // Show them grouped by category (only the categories that have something)
+      categories.forEach(function (cat) {
+        const found = top.filter(function (t) { return t.cat === cat; });
+        if (!found.length) return;
+
         const head = document.createElement('p');
         head.className = 'sugg-cat pixel';
         head.style.color = cat.color;
@@ -2178,27 +2534,15 @@
         list.className = 'sugg-list';
         box.appendChild(list);
 
-        if (cat.locked) {
-          list.innerHTML = '<div class="sugg-locked"><i class="ti ti-lock"></i><span></span></div>';
-          list.querySelector('span').textContent = cat.locked;
-          return;
-        }
-
-        const found = cat.find();
-        if (!found.length) {
-          list.innerHTML = '<div class="sugg-empty"></div>';
-          list.firstChild.textContent = cat.empty;
-          return;
-        }
-
-        found.forEach(function (i) {
+        found.forEach(function (t) {
+          const i = t.item;
           const row = document.createElement('div');
           row.className = 'sugg-row';
           row.innerHTML = '<div><span class="n"></span><span class="info"></span></div><button type="button" class="sugg-add" aria-label="Add to today"><i class="ti ti-plus"></i></button>';
           row.querySelector('.n').textContent = i.name;
           const stars = starsFor(i);
           if (stars) row.querySelector('.n').appendChild(stars);
-          row.querySelector('.info').textContent = (i.type === 'task' ? 'Task' : 'Reminder') + ' · ' + whenText(i);
+          row.querySelector('.info').textContent = cat.info ? cat.info(i) : (i.type === 'task' ? 'Task' : 'Reminder') + ' · ' + whenText(i);
 
           const btn = row.querySelector('.sugg-add');
           btn.onclick = function () {
@@ -2299,12 +2643,12 @@
       routine.perm.forEach(function (p) {
         const b = blockById(p.blockId);
         if (!b || p.day !== day || p.skips.indexOf(week) !== -1) return;
-        out.push({ name: b.name, start: p.start, end: endOf(p.start, b.dur), cat: catById(b.cat) });
+        out.push({ name: b.name, start: p.start, end: endOf(p.start, b.dur), cat: catById(b.cat), catId: b.cat, pid: p.id });
       });
       routine.temp.forEach(function (t) {
         const b = blockById(t.blockId);
         if (!b || t.week !== week || t.day !== day) return;
-        out.push({ name: b.name, start: t.start, end: endOf(t.start, b.dur), cat: catById(b.cat), temp: true });
+        out.push({ name: b.name, start: t.start, end: endOf(t.start, b.dur), cat: catById(b.cat), catId: b.cat, pid: t.id, temp: true });
       });
       return out;
     }
@@ -2789,14 +3133,35 @@
     // ---- A category picker (used by the block panel AND the event panel) ----
     // It shows: None, each of your categories, and "+ New" (make one right there).
     // "prefix" is the start of its element names, like 'b' for b-cats, b-newcat...
-    function makeCatPicker(prefix, errorId) {
+    // Two separate sets of categories: the routine's (also used by events) and the chores'.
+    const CAT_SETS = {
+      routine: {
+        title: 'CATEGORIES',
+        list: function () { return routine.cats; },
+        setList: function (v) { routine.cats = v; },
+        save: function () { saveRoutine(); },
+        // Blocks in a deleted category keep existing, just without a category
+        onDelete: function (cat) { routine.blocks.forEach(function (b) { if (b.cat === cat.id) b.cat = ''; }); saveRoutine(); }
+      },
+      chores: {
+        title: 'CHORE CATEGORIES',
+        list: function () { return choreCats; },
+        setList: function (v) { choreCats = v; },
+        save: function () { saveChoreCats(); },
+        onDelete: function (cat) { chores.forEach(function (c) { if (c.cat === cat.id) c.cat = ''; }); saveChores(); }
+      }
+    };
+
+    function makeCatPicker(prefix, errorId, setName) {
+      const set = CAT_SETS[setName || 'routine'];
+      const find = function (id) { return set.list().find(function (c) { return c.id === id; }); };
       const picker = { value: '', color: CAT_COLORS[0] };
 
       picker.draw = function () {
         const box = field(prefix + '-cats');
         box.innerHTML = '';
-        const choices = [{ id: '', name: 'None', color: '#29e7ff' }].concat(routine.cats);
-        if (picker.value && !catById(picker.value)) picker.value = '';   // it was deleted
+        const choices = [{ id: '', name: 'None', color: '#29e7ff' }].concat(set.list());
+        if (picker.value && !find(picker.value)) picker.value = '';      // it was deleted
         choices.forEach(function (c) {
           const btn = document.createElement('button');
           btn.type = 'button';
@@ -2830,8 +3195,8 @@
         const name = field(prefix + '-ncname').value.trim();
         if (!name) { field(errorId).textContent = 'Give the category a name.'; return; }
         const cat = { id: newId(), name: name, color: picker.color };
-        routine.cats.push(cat);
-        saveRoutine();
+        set.list().push(cat);
+        set.save();
         picker.value = cat.id;
         field(prefix + '-newcat').classList.add('hidden');
         picker.draw();
@@ -3003,12 +3368,14 @@
       drawCalendar();
     };
 
-    // ---- The Categories editor ----
+    // ---- The Categories editor (for the routine's categories or the chores') ----
+    let catSet = CAT_SETS.routine;
     function drawCatEditor() {
       const box = field('cat-list');
       box.innerHTML = '';
-      if (!routine.cats.length) box.innerHTML = '<p class="shelf-empty">No categories yet.</p>';
-      routine.cats.forEach(function (cat) {
+      field('cat-sheet-title').textContent = catSet.title;
+      if (!catSet.list().length) box.innerHTML = '<p class="shelf-empty">No categories yet.</p>';
+      catSet.list().forEach(function (cat) {
         const row = document.createElement('div');
         row.className = 'cat-row';
 
@@ -3022,7 +3389,7 @@
         input.type = 'text';
         input.value = cat.name;
         input.oninput = function () {
-          if (input.value.trim()) { cat.name = input.value.trim(); saveRoutine(); }
+          if (input.value.trim()) { cat.name = input.value.trim(); catSet.save(); }
         };
 
         const del = document.createElement('button');
@@ -3031,10 +3398,9 @@
         del.innerHTML = '<i class="ti ti-trash"></i>';
         del.setAttribute('aria-label', 'Delete category');
         del.onclick = function () {
-          // Blocks in this category keep existing, just without a category
-          routine.cats = routine.cats.filter(function (c) { return c !== cat; });
-          routine.blocks.forEach(function (b) { if (b.cat === cat.id) b.cat = ''; });
-          saveRoutine();
+          catSet.setList(catSet.list().filter(function (c) { return c !== cat; }));
+          catSet.onDelete(cat);
+          catSet.save();
           drawCatEditor();
         };
 
@@ -3044,7 +3410,7 @@
         dot.onclick = function () { colors.classList.toggle('hidden'); };
         drawSwatches(colors, cat.color, function (c) {
           cat.color = c;
-          saveRoutine();
+          catSet.save();
           drawCatEditor();
         });
 
@@ -3052,22 +3418,27 @@
         box.appendChild(row);
       });
     }
-    function openCatEditor() { drawCatEditor(); field('cat-sheet').classList.remove('hidden'); }
+    function openCatEditor(setName) {
+      catSet = CAT_SETS[setName || 'routine'];
+      drawCatEditor();
+      field('cat-sheet').classList.remove('hidden');
+    }
     function closeCatEditor() {
       field('cat-sheet').classList.add('hidden');
       blockCats.draw();       // update the panels that might be open underneath
       eventCats.draw();
+      choreCatPicker.draw();
       redraw();
     }
-    field('open-cats').onclick = openCatEditor;
-    field('b-edit-cats').onclick = openCatEditor;
-    field('f-edit-cats').onclick = openCatEditor;
+    field('open-cats').onclick = function () { openCatEditor('routine'); };
+    field('b-edit-cats').onclick = function () { openCatEditor('routine'); };
+    field('f-edit-cats').onclick = function () { openCatEditor('routine'); };
     field('cat-done').onclick = closeCatEditor;
     field('cat-sheet').onclick = function (e) { if (e.target === field('cat-sheet')) closeCatEditor(); };
     field('cat-add').onclick = function () {
-      const color = CAT_COLORS[routine.cats.length % CAT_COLORS.length];
-      routine.cats.push({ id: newId(), name: 'New category', color: color });
-      saveRoutine();
+      const color = CAT_COLORS[catSet.list().length % CAT_COLORS.length];
+      catSet.list().push({ id: newId(), name: 'New category', color: color });
+      catSet.save();
       drawCatEditor();
       const inputs = field('cat-list').querySelectorAll('input');
       inputs[inputs.length - 1].select();     // ready to type the name
@@ -3376,6 +3747,98 @@
         }
       }
     };
+    // A simple widget line: name on the left, something on the right, and an optional line under it
+    function widgetLine(box, name, right, sub, starsOf) {
+      const row = document.createElement('div');
+      row.className = 'wrow';
+      row.innerHTML = '<span class="wn"></span><span class="ww"></span>';
+      row.querySelector('.wn').textContent = name;
+      const stars = starsOf ? starsFor(starsOf) : null;
+      if (stars) row.querySelector('.wn').appendChild(stars);
+      row.querySelector('.ww').textContent = right;
+      box.appendChild(row);
+      if (sub) {
+        const s = document.createElement('div');
+        s.className = 'wnotes';
+        s.textContent = sub;
+        box.appendChild(s);
+      }
+      return row;
+    }
+    function widgetBar(box, p) {
+      const prog = projectProgress(p);
+      const bar = document.createElement('div');
+      bar.className = 'progress wbar';
+      bar.innerHTML = '<div></div>';
+      bar.firstChild.style.width = (prog.total ? Math.round(prog.done / prog.total * 100) : 0) + '%';
+      box.appendChild(bar);
+    }
+    function percentOf(p) {
+      const prog = projectProgress(p);
+      return prog.total ? Math.round(prog.done / prog.total * 100) + '%' : '—';
+    }
+    // Chores for widgets: the most pressing ones that aren't done today
+    function choresToDo() { return sortedChores().filter(function (c) { return !choreDoneOn(c, todayKey()); }); }
+    function choreShort(c) {
+      const days = choreDays(c);
+      if (days === 999) return '';
+      if (days < 0) return (-days) + 'd late';
+      if (days === 0) return 'Today';
+      if (days === 1) return 'Tmrw';
+      if (days < 7) return 'in ' + days + 'd';
+      return shortDate(parseKey(choreDue(c)));
+    }
+
+    WIDGET_TYPES.projects = {
+      name: 'Projects', icon: 'ti-folder', color: '#b59cff',
+      open: function () { openProject = null; showPage('projects'); },
+      small: function (box) {            // your top 3 projects and how far along they are
+        const list = activeProjects().slice(0, 3);
+        if (!list.length) return widgetEmpty(box, 'No projects yet.');
+        list.forEach(function (p) { widgetLine(box, p.name, percentOf(p)); });
+      },
+      medium: function (box) {           // the most pressing project and its next 3 tasks
+        const p = activeProjects()[0];
+        if (!p) return widgetEmpty(box, 'No projects yet.');
+        widgetLine(box, p.name, percentOf(p), null, p);
+        widgetBar(box, p);
+        const next = projectItems(p).filter(function (i) { return i.type === 'task' && !i.done && !i.dropped; }).sort(byPressing).slice(0, 3);
+        if (!next.length) return widgetEmpty(box, 'All tasks done!');
+        next.forEach(function (t) { widgetLine(box, '· ' + t.name, t.date ? shortWhen(t, true) : ''); });
+      },
+      large: function (box) {            // up to 4 projects, each with progress and its next task
+        const list = activeProjects().slice(0, 4);
+        if (!list.length) return widgetEmpty(box, 'No projects yet.');
+        list.forEach(function (p) {
+          const next = nextTask(p);
+          widgetLine(box, p.name, percentOf(p), next ? 'Next: ' + next.name : 'No tasks left', p);
+          widgetBar(box, p);
+        });
+      }
+    };
+
+    WIDGET_TYPES.chores = {
+      name: 'Chores', icon: 'ti-bucket', color: '#5dff9b',
+      open: function () { showPage('chores'); },
+      small: function (box) {            // the 3 most pressing
+        const list = choresToDo().slice(0, 3);
+        if (!list.length) return widgetEmpty(box, chores.length ? 'All clear!' : 'No chores yet.');
+        list.forEach(function (c) { widgetLine(box, c.name, choreShort(c)); });
+      },
+      medium: function (box) {           // the 5 most pressing
+        const list = choresToDo().slice(0, 5);
+        if (!list.length) return widgetEmpty(box, chores.length ? 'All clear!' : 'No chores yet.');
+        list.forEach(function (c) { widgetLine(box, c.name, choreShort(c), null, c); });
+      },
+      large: function (box) {            // more of them, with how often and when you last did them
+        const list = choresToDo().slice(0, 5);
+        if (!list.length) return widgetEmpty(box, chores.length ? 'All clear!' : 'No chores yet.');
+        list.forEach(function (c) {
+          widgetLine(box, c.name, choreShort(c), choreRepeatText(c) + (c.lastDone ? ' · last ' + shortDate(parseKey(c.lastDone)) : ''), c);
+        });
+      }
+    };
+
     const SIZE_NAMES = { small: 'Small', medium: 'Medium', large: 'Large' };
 
     function drawWidgets() {
@@ -3552,12 +4015,12 @@
     field('up-add').onclick = function () { openSheet(null, 'event'); };
 
     // STEP 15: BACKUP AND RESTORE (on the More page)
-    // Backup: puts everything (tasks, reminders, events, routine, categories, widgets) into one file.
+    // Backup: puts everything (tasks, reminders, events, routine, categories, widgets, projects, chores) into one file.
     //   On iPhone it opens the Share menu: choose "Save to Files" (iCloud Drive is a good spot).
     //   On a computer it downloads the file.
     // Restore: pick a backup file, confirm, and it replaces everything on this device.
     // To move between devices: Backup on one, Restore on the other.
-    const DATA_KEYS = ['brainfog-tasks', 'brainfog-routine', 'brainfog-widgets'];
+    const DATA_KEYS = ['brainfog-tasks', 'brainfog-routine', 'brainfog-widgets', 'brainfog-projects', 'brainfog-chores', 'brainfog-chore-cats', 'brainfog-picks'];
 
     function drawMore() {
       let last = null;
@@ -3628,17 +4091,687 @@
 
     // A simple "are you sure?" panel
     function confirmPanel(title, info, yesLabel, onYes) {
+      choicePanel(title, info, [{ icon: 'ti-check', label: yesLabel, run: onYes }]);
+    }
+
+    // STEP 16: PROJECTS
+    // A project has: name, importance (★), an optional due date, a status (active, paused, done)
+    // and notes. Tasks, reminders and events can belong to a project (their "project" is its id).
+    // A project task with no date waits inside the project until you plan it.
+    let projects = load('brainfog-projects');
+    function saveProjects() { save('brainfog-projects', projects); }
+    function projectById(id) { return projects.find(function (p) { return p.id === id; }); }
+    function projectItems(p) { return items.filter(function (i) { return i.project === p.id; }); }
+    function projectProgress(p) {
+      const tasks = projectItems(p).filter(function (i) { return i.type === 'task' && !i.dropped; });
+      return { done: tasks.filter(function (i) { return i.done; }).length, total: tasks.length };
+    }
+    // The next thing to do in a project: the most important unfinished task, then the soonest
+    function nextTask(p) {
+      return projectItems(p).filter(function (i) { return i.type === 'task' && !i.done && !i.dropped; }).sort(byPressing)[0] || null;
+    }
+    // Projects in order: most important first, then the closest due date (like everything else)
+    function sortProjects(list) {
+      return list.slice().sort(function (a, b) { return byPressing({ imp: a.imp, date: a.due }, { imp: b.imp, date: b.due }); });
+    }
+    function activeProjects() { return sortProjects(projects.filter(function (p) { return p.status === 'active'; })); }
+    // "due today", "3 days late", "due in 2 days", "due Oct 20"
+    function dueText(key) {
+      if (!key) return '';
+      const days = Math.round((parseKey(key) - parseKey(todayKey())) / 86400000);
+      if (days < 0) return (-days) + (days === -1 ? ' day' : ' days') + ' late';
+      if (days === 0) return 'due today';
+      if (days === 1) return 'due tomorrow';
+      if (days < 7) return 'due in ' + days + ' days';
+      return 'due ' + shortDate(parseKey(key));
+    }
+
+    let openProject = null;     // the project you're looking at (null = the list)
+
+    function drawProjects() {
+      field('proj-list-view').classList.toggle('hidden', !!openProject);
+      field('proj-detail-view').classList.toggle('hidden', !openProject);
+      if (openProject) drawProjectDetail(); else drawProjectList();
+    }
+
+    // ---- The list of projects, in three groups: Active, Paused, Done ----
+    function drawProjectList() {
+      const box = field('proj-list');
+      box.innerHTML = '';
+      if (!projects.length) {
+        box.innerHTML = '<div class="list glow-cyan"><div class="empty">No projects yet. Tap "+ New project" below.</div></div>';
+        return;
+      }
+      [['active', 'ACTIVE', false], ['paused', 'PAUSED', true], ['done', 'DONE', true]].forEach(function (group) {
+        const list = sortProjects(projects.filter(function (p) { return p.status === group[0]; }));
+        if (!list.length) return;
+        const key = 'projects ' + group[0];
+        const isFolded = key in folded ? folded[key] : group[2];
+        box.appendChild(foldHeading(group[1], list.length + (list.length === 1 ? ' PROJECT' : ' PROJECTS'), isFolded, 'var(--purple)', function () {
+          folded[key] = !isFolded;
+          drawProjectList();
+        }));
+        if (isFolded) return;
+        list.forEach(function (p) { box.appendChild(projectCard(p)); });
+      });
+    }
+
+    function projectCard(p) {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'proj-card';
+      card.innerHTML = '<div class="pc-top"><span class="pc-name"></span><span class="pc-due"></span></div>'
+        + '<div class="progress"><div></div></div><div class="pc-sub"></div>';
+      card.querySelector('.pc-name').textContent = p.name;
+      const stars = starsFor(p);
+      if (stars) card.querySelector('.pc-name').appendChild(stars);
+      const due = card.querySelector('.pc-due');
+      due.textContent = p.status === 'active' ? dueText(p.due) : '';
+      if (p.due && p.due < todayKey()) due.classList.add('late');
+      const prog = projectProgress(p);
+      card.querySelector('.progress div').style.width = (prog.total ? Math.round(prog.done / prog.total * 100) : 0) + '%';
+      const next = nextTask(p);
+      card.querySelector('.pc-sub').textContent = prog.done + '/' + prog.total + ' done'
+        + (next ? ' · Next: ' + next.name : prog.total ? ' · All done!' : ' · No tasks yet');
+      card.onclick = function () { openProject = p.id; drawProjects(); field('main').scrollTop = 0; };
+      return card;
+    }
+
+    // ---- One project's page ----
+    function drawProjectDetail() {
+      const p = projectById(openProject);
+      if (!p) { openProject = null; drawProjects(); return; }
+
+      const kindLine = field('pd-kind');
+      kindLine.innerHTML = '<span style="color: var(--purple)">PROJECT</span>';
+      const stars = starsFor(p);
+      if (stars) kindLine.appendChild(stars);
+      field('pd-name').textContent = p.name;
+      field('pd-due').textContent = p.due ? dueText(p.due) + ' · ' + niceDate(p.due) : 'No due date';
+      field('pd-due').classList.toggle('late', !!p.due && p.due < todayKey() && p.status !== 'done');
+      const prog = projectProgress(p);
+      field('pd-bar').style.width = (prog.total ? Math.round(prog.done / prog.total * 100) : 0) + '%';
+      field('pd-progress').textContent = prog.total ? prog.done + ' of ' + prog.total + ' tasks done' : 'No tasks yet';
+      document.querySelectorAll('.statb').forEach(function (btn) { btn.classList.toggle('on', btn.dataset.status === p.status); });
+
+      // Notes save as you type (but don't overwrite while you're typing in them)
+      if (document.activeElement !== field('pd-notes')) field('pd-notes').value = p.notes || '';
+
+      // TO DO: unfinished tasks and reminders, most pressing first (with their date if they have one)
+      const all = projectItems(p);
+      const todo = all.filter(function (i) { return i.type !== 'event' && !i.done && !i.dropped; }).sort(byPressing);
+      const todoBox = field('pd-todo');
+      todoBox.innerHTML = '';
+      todo.forEach(function (i) { todoBox.appendChild(makeRow({ kind: i.type, data: i }, { hideProject: true, showDate: true })); });
+      if (!todo.length) todoBox.innerHTML = '<div class="empty">Nothing to do here yet. Tap "+ Add to this project".</div>';
+
+      // COMING UP: this project's events (a repeating one shows once, on its next day)
+      const coming = upcomingEvents().filter(function (i) { return i.project === p.id; })
+        .sort(function (a, b) { return (a.date + (a.start || '')) < (b.date + (b.start || '')) ? -1 : 1; });
+      const comingBox = field('pd-coming');
+      comingBox.innerHTML = '';
+      coming.forEach(function (i) { comingBox.appendChild(makeRow({ kind: 'event', data: i.original || i }, { hideProject: true, showDate: true, dateOverride: i.date })); });
+      field('pd-coming-title').classList.toggle('hidden', !coming.length);
+      comingBox.classList.toggle('hidden', !coming.length);
+
+      // RECORD: what's done, newest first (folded until you open it)
+      const doneList = all.filter(function (i) { return i.type !== 'event' && i.date && (i.done || i.dropped); })
+        .sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+      const rec = field('pd-record');
+      rec.innerHTML = '';
+      if (doneList.length) {
+        const key = 'project record ' + p.id;
+        const isFolded = key in folded ? folded[key] : true;
+        rec.appendChild(foldHeading('RECORD', doneList.length + ' FINISHED', isFolded, 'var(--purple)', function () {
+          folded[key] = !isFolded;
+          drawProjectDetail();
+        }));
+        if (!isFolded) {
+          const list = document.createElement('div');
+          list.className = 'list glow-cyan';
+          doneList.forEach(function (i) { list.appendChild(recordRow(i)); });
+          rec.appendChild(list);
+        }
+      }
+    }
+
+    field('proj-back').onclick = function () { openProject = null; drawProjects(); };
+    field('pd-notes').oninput = function () {
+      const p = projectById(openProject);
+      if (p) { p.notes = field('pd-notes').value; saveProjects(); }
+    };
+    document.querySelectorAll('.statb').forEach(function (btn) {
+      btn.onclick = function () {
+        const p = projectById(openProject);
+        p.status = btn.dataset.status;
+        saveProjects();
+        drawProjectDetail();
+      };
+    });
+    field('pd-add').onclick = function () { openSheet(null, 'task', '', openProject); };
+
+    // ---- Making and editing projects ----
+    let editingProject = null;
+    let projectImp = 0;
+    function setProjectImp(n) {
+      projectImp = n;
+      document.querySelectorAll('.pimp').forEach(function (btn) { btn.classList.toggle('on', Number(btn.dataset.imp) === n); });
+    }
+    document.querySelectorAll('.pimp').forEach(function (btn) { btn.onclick = function () { setProjectImp(Number(btn.dataset.imp)); }; });
+
+    function openProjectSheet(p) {
+      editingProject = p || null;
+      field('proj-title').textContent = p ? 'EDIT PROJECT' : 'NEW PROJECT';
+      field('p-name').value = p ? p.name : '';
+      field('p-due').value = p && p.due ? p.due : '';
+      field('p-error').textContent = '';
+      field('p-delete').classList.toggle('hidden', !p);
+      setProjectImp(p ? (p.imp || 0) : 0);
+      field('proj-sheet').classList.remove('hidden');
+    }
+    function closeProjectSheet() { field('proj-sheet').classList.add('hidden'); editingProject = null; }
+    field('proj-new').onclick = function () { openProjectSheet(null); };
+    field('pd-edit').onclick = function () { openProjectSheet(projectById(openProject)); };
+    field('p-cancel').onclick = closeProjectSheet;
+    field('proj-sheet').onclick = function (e) { if (e.target === field('proj-sheet')) closeProjectSheet(); };
+    field('p-name').oninput = function () { field('p-error').textContent = ''; };
+
+    field('proj-form').onsubmit = function (e) {
+      e.preventDefault();
+      const name = field('p-name').value.trim();
+      if (!name) { field('p-error').textContent = 'Give the project a name.'; return; }
+      if (editingProject) {
+        editingProject.name = name;
+        editingProject.imp = projectImp;
+        editingProject.due = field('p-due').value;
+      } else {
+        const p = { id: newId(), name: name, imp: projectImp, due: field('p-due').value, status: 'active', notes: '', created: todayKey() };
+        projects.push(p);
+        openProject = p.id;               // go straight into the new project
+      }
+      saveProjects();
+      closeProjectSheet();
+      redraw();
+    };
+
+    // Deleting a project: its tasks with no date go too; everything with a date stays, just without the project
+    field('p-delete').onclick = function () {
+      const p = editingProject;
+      closeProjectSheet();
+      choicePanel('DELETE ' + p.name.toUpperCase() + '?', 'Its tasks and reminders with no date are deleted too. Things with a date stay, without the project.', [
+        { icon: 'ti-trash', label: 'Delete project', run: function () {
+          items = items.filter(function (i) { return !(i.project === p.id && !i.date); });
+          items.forEach(function (i) { if (i.project === p.id) i.project = ''; });
+          projects = projects.filter(function (x) { return x !== p; });
+          saveItems();
+          saveProjects();
+          openProject = null;
+        } }
+      ]);
+    };
+
+    // The Project choice in the add panel: None, then your projects (not the finished ones)
+    function fillProjectChoices(selected) {
+      const select = field('f-project');
+      select.innerHTML = '<option value="">None</option>';
+      sortProjects(projects).forEach(function (p) {
+        if (p.status === 'done' && p.id !== selected) return;
+        const option = document.createElement('option');
+        option.value = p.id;
+        option.textContent = p.name + (p.status === 'paused' ? ' (paused)' : '');
+        select.appendChild(option);
+      });
+      select.value = selected || '';
+    }
+
+    // A panel with a list of choices (each can have a small second line); redraws after a choice
+    function choicePanel(title, info, choices) {
       field('act-title').textContent = title;
       field('act-info').textContent = info;
       const box = field('act-choices');
       box.innerHTML = '';
-      const yes = document.createElement('button');
-      yes.type = 'button';
-      yes.innerHTML = '<i class="ti ti-check" style="color: var(--yellow)"></i><span></span>';
-      yes.querySelector('span').textContent = yesLabel;
-      yes.onclick = function () { field('act-sheet').classList.add('hidden'); onYes(); };
-      box.appendChild(yes);
+      choices.forEach(function (c) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.innerHTML = '<i class="ti ' + c.icon + '"></i><span class="ctext"><span></span><small></small></span>';
+        btn.querySelector('.ctext span').textContent = c.label;
+        if (c.sub) btn.querySelector('small').textContent = c.sub; else btn.querySelector('small').remove();
+        btn.onclick = function () {
+          field('act-sheet').classList.add('hidden');
+          c.run();
+          redraw();
+        };
+        box.appendChild(btn);
+      });
       field('act-sheet').classList.remove('hidden');
+    }
+
+    // STEP 17: CHORES (a page under More)
+    // A chore comes back in one of two ways (you choose for each chore):
+    //   every X days after you last did it  (do it late → the next one moves later too)
+    //   on set days of the week             (like every Sunday, no matter when you last did it)
+    let chores = load('brainfog-chores');
+    function saveChores() { save('brainfog-chores', chores); }
+    // Chores have their own categories (like Kitchen, Bathroom), separate from the routine's
+    let choreCats = load('brainfog-chore-cats');
+    function saveChoreCats() { save('brainfog-chore-cats', choreCats); }
+    function choreCatById(id) { return choreCats.find(function (c) { return c.id === id; }); }
+    let choreView = 'all';      // 'all' = everything, most pressing first; 'cat' = grouped by category
+    function choreById(id) { return chores.find(function (c) { return c.id === id; }); }
+
+    // When is it due next? (a date like "2026-10-02", or null)
+    function choreDue(c) {
+      const today = todayKey();
+      if (c.mode === 'days') {
+        if (!c.days || !c.days.length) return null;
+        // Missed? The last set day (up to today) that came after you last did it
+        for (let n = 0; n < 7; n++) {
+          const key = daysFromToday(-n);
+          if (c.days.indexOf(parseKey(key).getDay()) === -1) continue;
+          if ((!c.lastDone || c.lastDone < key) && (!c.created || key >= c.created)) return key;
+          break;
+        }
+        // Otherwise the next set day after today (or today, if not done yet)
+        for (let n = 0; n < 8; n++) {
+          const key = daysFromToday(n);
+          if (c.days.indexOf(parseKey(key).getDay()) !== -1 && c.lastDone !== key) return key;
+        }
+        return null;
+      }
+      if (!c.lastDone) return c.created && c.created < today ? c.created : today;   // never done: due now
+      return dateKey(addDays(parseKey(c.lastDone), c.every || 7));
+    }
+    // How many days until it's due (negative = late)
+    function choreDays(c) {
+      const due = choreDue(c);
+      return due === null ? 999 : Math.round((parseKey(due) - parseKey(todayKey())) / 86400000);
+    }
+    // "3d late", "today", "in 2d", "Oct 20" plus a style
+    function choreWhen(c) {
+      const days = choreDays(c);
+      if (days === 999) return { text: '—', cls: '' };
+      if (days < 0) return { text: (-days) + 'D LATE', cls: 'late' };
+      if (days === 0) return { text: 'TODAY', cls: 'today' };
+      if (days === 1) return { text: 'TMRW', cls: '' };
+      if (days < 7) return { text: 'IN ' + days + 'D', cls: '' };
+      return { text: shortDate(parseKey(choreDue(c))).toUpperCase(), cls: '' };
+    }
+    // "Every 7 days" or "Sun, Wed"
+    function choreRepeatText(c) {
+      if (c.mode === 'days') return (c.days || []).slice().sort().map(function (d) { return DAY_LETTERS[d]; }).join(', ') || 'No days set';
+      return c.every === 1 ? 'Every day' : 'Every ' + (c.every || 7) + ' days';
+    }
+    // Most pressing first: the most late / soonest due, then the most important
+    function sortedChores() {
+      return chores.slice().sort(function (a, b) { return (choreDays(a) - choreDays(b)) || ((b.imp || 0) - (a.imp || 0)); });
+    }
+    function choreDoneOn(c, key) { return (c.history || []).indexOf(key) !== -1; }
+
+    // Mark a chore done (or not done) on a day
+    function setChoreDone(id, key, done) {
+      const c = choreById(id);
+      if (!c) return;
+      c.history = (c.history || []).filter(function (k) { return k !== key; });
+      if (done) c.history.push(key);
+      c.history.sort();
+      c.lastDone = c.history.length ? c.history[c.history.length - 1] : '';
+      saveChores();
+    }
+
+    function drawChores() {
+      const box = field('chore-list');
+      box.innerHTML = '';
+      field('cv-all').classList.toggle('on', choreView === 'all');
+      field('cv-cat').classList.toggle('on', choreView === 'cat');
+      field('chore-sub').textContent = choreView === 'all' ? 'Most pressing first' : 'By category';
+      const list = sortedChores();
+      const isDue = function (c) { return choreDays(c) <= 0 && !choreDoneOn(c, todayKey()); };
+      const due = list.filter(isDue).length;
+      field('chore-score').textContent = list.length ? (due ? due + ' TO DO NOW' : 'ALL CLEAR') : '';
+      if (!list.length) {
+        box.innerHTML = '<div class="list glow-cyan"><div class="empty">No chores yet. Tap "+ New chore" below.</div></div>';
+        return;
+      }
+
+      // ALL: one list, most pressing first
+      if (choreView === 'all') {
+        const one = document.createElement('div');
+        one.className = 'list glow-cyan';
+        list.forEach(function (c) { one.appendChild(choreRow(c, true)); });
+        box.appendChild(one);
+        return;
+      }
+
+      // BY CATEGORY: one foldable group per category (A to Z), "No category" last.
+      // Inside each group, still most pressing first.
+      const groups = choreCats.slice().sort(function (a, b) { return a.name.localeCompare(b.name); })
+        .map(function (cat) { return { id: cat.id, name: cat.name, color: cat.color }; });
+      groups.push({ id: '', name: 'No category', color: '#8f8ab8' });
+      groups.forEach(function (g) {
+        const inGroup = list.filter(function (c) { return (choreCatById(c.cat) ? c.cat : '') === g.id; });
+        if (!inGroup.length) return;
+        const key = 'chores cat ' + g.id;
+        const isFolded = !!folded[key];
+        const dueHere = inGroup.filter(isDue).length;
+        box.appendChild(foldHeading(g.name.toUpperCase(), inGroup.length + (dueHere ? ' · ' + dueHere + ' DUE' : ''), isFolded, g.color, function () {
+          folded[key] = !isFolded;
+          drawChores();
+        }));
+        if (isFolded) return;
+        const group = document.createElement('div');
+        group.className = 'list glow-cyan';
+        inGroup.forEach(function (c) { group.appendChild(choreRow(c, false)); });
+        box.appendChild(group);
+      });
+    }
+    field('cv-all').onclick = function () { choreView = 'all'; drawChores(); };
+    field('cv-cat').onclick = function () { choreView = 'cat'; drawChores(); };
+
+    function choreRow(c, showCat) {
+      const doneToday = choreDoneOn(c, todayKey());
+      const row = document.createElement('div');
+      row.className = 'item chore-row' + (doneToday ? ' done' : '');
+
+      const when = document.createElement('div');
+      const w = doneToday ? { text: 'DONE', cls: '' } : choreWhen(c);
+      when.className = 'chore-when ' + w.cls;
+      when.textContent = w.text;
+
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = c.name;
+      const cat = showCat ? choreCatById(c.cat) : null;     // its category, in the "All" view
+      if (cat) {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.textContent = cat.name.toUpperCase();
+        chip.style.color = cat.color;
+        chip.style.background = tint(cat.color, 0.18);
+        name.insertBefore(chip, name.firstChild);
+      }
+      const stars = starsFor(c);
+      if (stars) name.appendChild(stars);
+      if (c.dur) {
+        const dur = document.createElement('span');
+        dur.className = 'dur';
+        dur.textContent = durationText(c.dur);
+        name.appendChild(dur);
+      }
+      const sub = document.createElement('span');
+      sub.className = 'chore-sub';
+      sub.textContent = choreRepeatText(c) + ' · ' + (c.lastDone ? 'last done ' + shortDate(parseKey(c.lastDone)) : 'not done yet');
+      name.appendChild(sub);
+      name.onclick = function () { openChoreSheet(c); };
+
+      const slot = document.createElement('div');
+      slot.className = 'slot';
+      slot.innerHTML = '<div class="check"></div>';
+      slot.onclick = function () {
+        setChoreDone(c.id, todayKey(), !doneToday);
+        drawChores();
+      };
+
+      row.append(when, name, slot);
+      return row;
+    }
+
+    // ---- Making and editing chores ----
+    let editingChore = null;
+    let choreMode = 'every';
+    let choreImp = 0;
+    let choreDaysPicked = [];
+
+    (function () {
+      const none = document.createElement('option');
+      none.value = 0;
+      none.textContent = 'Not sure';
+      field('c-dur').appendChild(none);
+      [5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 240].forEach(function (m) {
+        const option = document.createElement('option');
+        option.value = m;
+        option.textContent = durationText(m);
+        field('c-dur').appendChild(option);
+      });
+      for (let d = 1; d <= 60; d++) {
+        const option = document.createElement('option');
+        option.value = d;
+        option.textContent = d === 1 ? 'every day' : 'every ' + d + ' days' + (d === 7 ? ' (weekly)' : d === 14 ? ' (2 weeks)' : d === 30 ? ' (monthly)' : '');
+        field('c-every').appendChild(option);
+      }
+    })();
+
+    function setChoreMode(mode) {
+      choreMode = mode;
+      field('cm-every').classList.toggle('on', mode === 'every');
+      field('cm-days').classList.toggle('on', mode === 'days');
+      field('c-every-wrap').classList.toggle('hidden', mode !== 'every');
+      field('c-days-wrap').classList.toggle('hidden', mode !== 'days');
+      field('c-mode-hint').textContent = mode === 'every'
+        ? 'Counts from the last time you did it. Do it late, and the next one moves later too.'
+        : 'Due on these days every week, no matter when you last did it.';
+      field('c-error').textContent = '';
+    }
+    field('cm-every').onclick = function () { setChoreMode('every'); };
+    field('cm-days').onclick = function () { setChoreMode('days'); };
+
+    function setChoreImp(n) {
+      choreImp = n;
+      document.querySelectorAll('.cimp').forEach(function (btn) { btn.classList.toggle('on', Number(btn.dataset.imp) === n); });
+    }
+    document.querySelectorAll('.cimp').forEach(function (btn) { btn.onclick = function () { setChoreImp(Number(btn.dataset.imp)); }; });
+
+    function drawChoreDays() {
+      const box = field('c-days');
+      box.innerHTML = '';
+      DAY_LETTERS.forEach(function (letter, d) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'dayb' + (choreDaysPicked.indexOf(d) !== -1 ? ' on' : '');
+        btn.textContent = letter;
+        btn.onclick = function () {
+          if (choreDaysPicked.indexOf(d) === -1) choreDaysPicked.push(d);
+          else choreDaysPicked = choreDaysPicked.filter(function (x) { return x !== d; });
+          field('c-error').textContent = '';
+          drawChoreDays();
+        };
+        box.appendChild(btn);
+      });
+    }
+
+    function openChoreSheet(c) {
+      editingChore = c || null;
+      field('chore-title').textContent = c ? 'EDIT CHORE' : 'NEW CHORE';
+      field('c-name').value = c ? c.name : '';
+      field('c-dur').value = c ? (c.dur || 0) : 30;
+      field('c-every').value = c ? (c.every || 7) : 7;
+      field('c-last').value = c && c.lastDone ? c.lastDone : '';
+      field('c-last').max = todayKey();
+      field('c-notes').value = c && c.notes ? c.notes : '';
+      field('c-error').textContent = '';
+      field('c-delete').classList.toggle('hidden', !c);
+      choreDaysPicked = c && c.days ? c.days.slice() : [];
+      setChoreImp(c ? (c.imp || 0) : 0);
+      setChoreMode(c ? (c.mode || 'every') : 'every');
+      drawChoreDays();
+      choreCatPicker.open(c ? c.cat : '');
+      field('chore-sheet').classList.remove('hidden');
+    }
+    function closeChoreSheet() { field('chore-sheet').classList.add('hidden'); editingChore = null; }
+    field('chore-new').onclick = function () { openChoreSheet(null); };
+    field('c-cancel').onclick = closeChoreSheet;
+    field('chore-sheet').onclick = function (e) { if (e.target === field('chore-sheet')) closeChoreSheet(); };
+    field('c-name').oninput = function () { field('c-error').textContent = ''; };
+
+    field('chore-form').onsubmit = function (e) {
+      e.preventDefault();
+      const name = field('c-name').value.trim();
+      if (!name) { field('c-error').textContent = 'Give the chore a name.'; return; }
+      if (choreMode === 'days' && !choreDaysPicked.length) { field('c-error').textContent = 'Pick at least one day.'; return; }
+      const last = field('c-last').value;
+      if (last && last > todayKey()) { field('c-error').textContent = 'Last done can\'t be in the future.'; return; }
+      const c = editingChore || { id: newId(), history: [], created: todayKey() };
+      c.name = name;
+      c.dur = Number(field('c-dur').value);
+      c.imp = choreImp;
+      c.mode = choreMode;
+      c.every = Number(field('c-every').value);
+      c.days = choreDaysPicked.slice();
+      c.notes = field('c-notes').value.trim();
+      c.cat = choreCatPicker.value;
+      // "Last done": if you changed it, it becomes the latest day it was done
+      let history = (c.history || []).slice();
+      if (last !== (c.lastDone || '')) {
+        if (!last) history = [];                                                     // cleared = never done
+        else {
+          history = history.filter(function (k) { return k < last; });               // forget later days
+          history.push(last);
+        }
+      }
+      c.history = history.sort();
+      c.lastDone = c.history.length ? c.history[c.history.length - 1] : '';
+      if (!editingChore) chores.push(c);
+      saveChores();
+      closeChoreSheet();
+      redraw();
+    };
+    field('c-delete').onclick = function () {
+      const c = editingChore;
+      closeChoreSheet();
+      chores = chores.filter(function (x) { return x !== c; });
+      saveChores();
+      redraw();
+    };
+
+    // STEP 19: THE MORE PAGE. Each section is a tile; they're sorted alphabetically,
+    // except Settings, which is always last.
+    // To add a new section later, add it to this list (locked = not built yet).
+    const MORE_SECTIONS = [
+      { page: 'chores',   name: 'Chores',   icon: 'ti-bucket',          color: '#5dff9b' },
+      { page: 'finance',  name: 'Finance',  icon: 'ti-currency-dollar', color: '#ffe14d', locked: true },
+      { page: 'settings', name: 'Settings', icon: 'ti-dots',            color: '#29e7ff' }
+    ];
+    function drawMoreTiles() {
+      const box = field('more-tiles');
+      box.innerHTML = '';
+      MORE_SECTIONS.slice().sort(function (a, b) {
+        if (a.page === 'settings') return 1;          // Settings always goes last
+        if (b.page === 'settings') return -1;
+        return a.name.localeCompare(b.name);
+      }).forEach(function (m) {
+        const tile = document.createElement('button');
+        tile.type = 'button';
+        tile.className = 'tile' + (m.locked ? ' soon' : '');
+        tile.innerHTML = '<span class="ticon"><i class="ti ' + m.icon + '"></i></span><span class="tname"></span>';
+        tile.querySelector('.ticon').style.setProperty('--c', m.color);
+        tile.querySelector('.tname').style.setProperty('--c', m.color);
+        tile.querySelector('.tname').textContent = m.name.toUpperCase();
+        tile.onclick = function () { showPage(m.page); };
+        box.appendChild(tile);
+      });
+    }
+    field('chores-back').onclick = function () { showPage('more'); };
+    const choreCatPicker = makeCatPicker('c', 'c-error', 'chores');   // the category choice in the chore panel
+    field('c-edit-cats').onclick = function () { openCatEditor('chores'); };
+    field('settings-back').onclick = function () { showPage('more'); };
+
+    // STEP 18: CHORE and PROJECT blocks on Home.
+    // A routine block in the "Chore" category shows your most pressing chore;
+    // one in the "Project" category shows your most pressing project and its next task.
+    // Tap it to swap to a different one. Your choice is remembered for that day ("picks").
+    let picks = (function () {
+      try { return JSON.parse(localStorage.getItem('brainfog-picks')) || {}; }
+      catch (e) { return {}; }
+    })();
+    function savePicks() { save('brainfog-picks', picks); }
+
+    function pickChore(day, pid, used) {
+      if (!chores.length) return null;
+      const pickKey = day + '|' + pid;
+      const list = sortedChores().filter(function (c) { return used.indexOf(c.id) === -1; });
+      let c = picks[pickKey] ? choreById(picks[pickKey]) : null;
+      if (!c) c = list.find(function (x) { return !choreDoneOn(x, day); }) || list[0];
+      if (!c) return null;
+      used.push(c.id);
+      return { type: 'chore', chore: c, pickKey: pickKey };
+    }
+
+    function pickProject(day, pid, used) {
+      const list = activeProjects().filter(function (p) { return used.indexOf(p.id) === -1; });
+      if (!list.length && !picks[day + '|' + pid]) return null;
+      const pickKey = day + '|' + pid;
+      let p = picks[pickKey] ? projectById(picks[pickKey]) : null;
+      if (!p) p = list.find(function (x) { return nextTask(x); }) || list[0];
+      if (!p) return null;
+      used.push(p.id);
+      let task = picks[pickKey + '#task'] ? items.find(function (i) { return i.id === picks[pickKey + '#task']; }) : null;
+      if (!task || task.project !== p.id) task = nextTask(p);
+      return { type: 'project', project: p, task: task, pickKey: pickKey };
+    }
+
+    // Draw a linked block's row: the chore's name, or "Project → next task", with a check
+    function drawLinkedRow(row, name, slot, data) {
+      const link = data.link;
+      const text = Array.from(name.childNodes).find(function (n) { return n.nodeType === 3; });   // the block's name text
+      if (link && link.type === 'chore') {
+        text.nodeValue = link.chore.name;
+        const done = choreDoneOn(link.chore, data.day);
+        if (done) row.classList.add('done');
+        slot.innerHTML = '<div class="check"></div>';
+        slot.onclick = function () {
+          picks[link.pickKey] = link.chore.id;         // keep this chore in this block
+          savePicks();
+          setChoreDone(link.chore.id, data.day, !done);
+          redraw();
+        };
+      } else if (link && link.type === 'project') {
+        text.nodeValue = link.project.name + (link.task ? ' → ' + link.task.name : ' → no tasks left');
+        if (link.task) {
+          if (link.task.done) row.classList.add('done');
+          slot.innerHTML = '<div class="check"></div>';
+          slot.onclick = function () {
+            picks[link.pickKey] = link.project.id;     // keep this task in this block
+            picks[link.pickKey + '#task'] = link.task.id;
+            savePicks();
+            toggleDone(link.task);
+            redraw();
+          };
+        }
+      }
+      // Tapping the name: choose a different one
+      name.onclick = function () {
+        if (data.catId === 'chore') openChoreSwap(data);
+        else openProjectSwap(data);
+      };
+    }
+
+    function openChoreSwap(data) {
+      const pickKey = data.day + '|' + data.pid;
+      const choices = sortedChores().map(function (c) {
+        return { icon: 'ti-bucket', label: c.name, sub: choreWhen(c).text.toLowerCase() + ' · ' + choreRepeatText(c), run: function () {
+          picks[pickKey] = c.id;
+          savePicks();
+        } };
+      });
+      choices.push({ icon: 'ti-external-link', label: 'Open Chores', run: function () { showPage('chores'); } });
+      choicePanel('SWAP CHORE', chores.length ? 'Pick a chore for this block.' : 'You have no chores yet. Add some in Chores.', choices);
+    }
+
+    function openProjectSwap(data) {
+      const pickKey = data.day + '|' + data.pid;
+      const choices = activeProjects().map(function (p) {
+        const next = nextTask(p);
+        return { icon: 'ti-folder', label: p.name, sub: next ? 'Next: ' + next.name : 'No tasks left', run: function () {
+          picks[pickKey] = p.id;
+          delete picks[pickKey + '#task'];
+          savePicks();
+        } };
+      });
+      if (data.link) choices.push({ icon: 'ti-external-link', label: 'Open ' + data.link.project.name, run: function () {
+        openProject = data.link.project.id;
+        showPage('projects');
+      } });
+      else choices.push({ icon: 'ti-external-link', label: 'Open Projects', run: function () { showPage('projects'); } });
+      choicePanel('SWAP PROJECT', projects.length ? 'Pick a project for this block.' : 'You have no projects yet. Add one in Projects.', choices);
     }
 
     // STEP 11: Start everything
