@@ -245,6 +245,103 @@
     .status-event { color: var(--yellow); opacity: 0.7; }
     .type-tag.event { color: var(--yellow); }
 
+
+    /* Details: the note icon on lists, the text where it's shown, and the details panel */
+    .has-notes { font-size: 13px; color: var(--dim); margin-left: 6px; vertical-align: middle; }
+    .notes {
+      display: block; font-size: 13px; color: var(--dim); margin-top: 3px; white-space: pre-wrap;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .panel textarea {
+      font: inherit; font-size: 16px; color: var(--text); background: var(--field);
+      border: 2px solid rgba(41, 231, 255, 0.4); border-radius: 10px; padding: 10px 12px; width: 100%; resize: vertical;
+    }
+    .panel textarea:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+    .detail-kind { font-size: 9px; margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+    .panel .detail-name { font-family: 'Chakra Petch', sans-serif; font-size: 22px; font-weight: 600; margin: 0; color: var(--text); text-shadow: none; }
+    .detail-when { color: var(--cyan); margin: 0; font-size: 15px; }
+    .detail-notes { white-space: pre-wrap; font-size: 15px; line-height: 1.5; padding: 12px; border-radius: 12px; background: var(--field); }
+    .detail-notes.empty-notes { color: var(--dim); }
+    #d-check { margin-right: auto; }
+    #d-check.done-btn { border-color: var(--pink); color: var(--pink); }
+
+
+    /* ---- Widgets on Home (like iPhone widgets) ----
+       The grid has 3 columns, and counts height in HALF-rows (2 half-rows = a column's width):
+         small  = 1 column,  2 half-rows → a square (3 fit in a row)
+         medium = 3 columns, 2 half-rows → a full row, as tall as a small
+         large  = 3 columns, 3 half-rows → a full row, 1.5 times as tall as a medium */
+    .widgets-head { margin: 4px 0 10px; }
+    .small-btn.bolt { color: var(--yellow); border-color: rgba(255, 225, 77, 0.6); padding: 6px 10px; }
+    .small-btn.bolt i { font-size: 18px; }
+    #page-home { container-type: inline-size; }  /* lets the widget rows match the column width */
+    .widgets {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-auto-rows: 50px;                     /* backup for older phones */
+      grid-auto-rows: calc(((100cqw - 20px) / 3 - 10px) / 2);   /* half of a square, minus the gap */
+      gap: 10px;
+    }
+    .widget {
+      --c: var(--cyan);
+      position: relative; border-radius: 16px; padding: 8px 10px; overflow: hidden; cursor: pointer;
+      border: 2px solid var(--c);
+      box-shadow: 0 0 5px var(--c), 0 0 14px rgba(0, 0, 0, 0.4);
+      display: flex; flex-direction: column; gap: 4px; min-width: 0; min-height: 0;
+      font-size: 12px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .widget.small  { grid-column: span 1; grid-row: span 2; }
+    .widget.medium { grid-column: span 3; grid-row: span 2; }
+    .widget.large  { grid-column: span 3; grid-row: span 3; }
+    .widget .wtitle { font-family: 'Press Start 2P', monospace; font-size: 7px; color: var(--c); display: flex; align-items: center; gap: 5px; margin: 0 0 2px; }
+    .widget .wtitle i { font-size: 12px; }
+    .widget .wempty { color: var(--dim); font-size: 12px; margin: auto 0; }
+
+    /* one line per thing: name on the left, when on the right */
+    .wrow { display: flex; align-items: baseline; gap: 6px; min-width: 0; line-height: 1.3; }
+    .wrow .wn { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wrow .ww { flex: none; font-size: 11px; color: var(--c); }
+    .wrow .stars { font-size: 9px; margin-left: 3px; }
+    /* in a small widget, the "when" goes first and short, like "17:00 Dentist" */
+    .widget.small .wrow { font-size: 11px; }
+    .widget.small .wrow .ww { order: -1; font-size: 10px; }
+    .wnotes { font-size: 11px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: -3px; }
+    .wday { font-size: 7px; font-family: 'Press Start 2P', monospace; color: var(--dim); margin: 2px 0 0; }
+
+    /* the week strip (medium calendar) */
+    .wweek { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; flex: 1; min-height: 0; }
+    .wweek .wd { border-radius: 7px; background: var(--field); padding: 3px 2px; display: flex; flex-direction: column; gap: 2px; min-width: 0; overflow: hidden; }
+    .wweek .wd b { font-size: 10px; color: var(--cyan); text-align: center; }
+    .wweek .wd.today { outline: 1.5px solid var(--yellow); }
+    .wweek .wd.today b { color: var(--yellow); }
+    .wweek .we { font-size: 8px; line-height: 1.2; padding: 1px 2px; border-radius: 3px; background: rgba(255, 225, 77, 0.18); color: var(--yellow); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wweek .wmore { font-size: 8px; color: var(--dim); text-align: center; }
+
+    /* large calendar: the month on the left, the next events on the right */
+    .wsplit { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex: 1; min-height: 0; }
+    .wsplit > div { display: flex; flex-direction: column; gap: 3px; min-width: 0; min-height: 0; overflow: hidden; }
+    .wmonth { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; text-align: center; font-size: 10px; }
+    .wmonth span { padding: 2px 0; border-radius: 5px; position: relative; }
+    .wmonth .h { color: var(--cyan); font-size: 8px; }
+    .wmonth .o { opacity: 0.3; }
+    .wmonth .t { color: var(--bg); background: var(--yellow); font-weight: 600; }
+    .wmonth .ev::after { content: ''; position: absolute; left: 50%; bottom: 0; width: 3px; height: 3px; margin-left: -1.5px; border-radius: 50%; background: var(--yellow); }
+    .wmonth .t.ev::after { background: var(--bg); }
+    .wsplit .wrow { font-size: 12px; }
+    .wsplit .wrow .ww { font-size: 10px; }
+
+    /* widget chooser panel */
+    .w-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 12px; background: var(--field); }
+    .w-row .wname { flex: 1; font-size: 15px; }
+    .w-row .wname small { color: var(--dim); font-size: 12px; margin-left: 4px; }
+    .w-row button {
+      font: inherit; font-size: 13px; min-width: 38px; height: 38px; padding: 0 10px; border-radius: 10px; cursor: pointer;
+      background: none; color: var(--text); border: 2px solid rgba(143, 138, 184, 0.5);
+    }
+    .w-row .wsize { color: var(--yellow); border-color: rgba(255, 225, 77, 0.6); }
+    .w-row .wdel { color: var(--red); border-color: var(--red); }
+
     /* ---- The Suggestions panel ---- */
     .sugg-cat { display: flex; align-items: center; gap: 8px; font-size: 10px; margin: 8px 0 0; }
     .sugg-cat i { font-size: 16px; }
@@ -262,22 +359,6 @@
     .sugg-empty { color: var(--dim); font-size: 13px; padding: 10px 0; }
     .sugg-locked { display: flex; align-items: center; gap: 8px; color: var(--dim); font-size: 13px; padding: 10px 0; }
 
-    /* Widgets: a grid of 2 columns; "wide" ones take both columns */
-    .widgets {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-    .widget {
-      border-radius: var(--round);
-      padding: 12px;
-      font-size: 14px;
-    }
-    .widget.wide { grid-column: span 2; }
-    .widget .label { font-size: 10px; display: block; margin-bottom: 8px; }
-    .widget .from  { font-size: 11px; color: var(--dim); display: block; margin-top: 6px; }
-    .progress { height: 10px; border-radius: 6px; background: rgba(41, 231, 255, 0.15); margin-top: 8px; overflow: hidden; }
-    .progress div { height: 100%; width: 40%; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
 
     /* The "locked" screen for areas we haven't built yet */
     .locked { border-radius: var(--round); padding: 30px 20px; margin-top: 30px; text-align: center; }
@@ -650,40 +731,12 @@
         <button class="add yellow" id="sugg-btn"><i class="ti ti-bulb"></i> Suggestions</button>
       </div>
 
-      <!-- Widgets (examples: each will come from its own page later) -->
-      <div class="widgets">
-        <div class="widget wide glow-pink">
-          <span class="label pixel" style="color: var(--pink)">NEXT UP</span>
-          Unreal lesson · 18:00
-          <span class="from">from Reminders</span>
-        </div>
-        <div class="widget glow-yellow">
-          <span class="label pixel" style="color: var(--yellow)">STREAK</span>
-          3 days
-          <span class="from">from Trackers</span>
-        </div>
-        <div class="widget glow-cyan">
-          <span class="label pixel" style="color: var(--cyan)">WATER</span>
-          4 / 8
-          <span class="from">from Trackers</span>
-        </div>
-        <div class="widget wide glow-cyan">
-          <span class="label pixel" style="color: var(--cyan)">QUEST</span>
-          Portfolio project
-          <div class="progress"><div></div></div>
-          <span class="from">from Projects</span>
-        </div>
-        <div class="widget glow-pink">
-          <span class="label pixel" style="color: var(--pink)">WORKOUT</span>
-          Legs day
-          <span class="from">from Fitness</span>
-        </div>
-        <div class="widget glow-yellow">
-          <span class="label pixel" style="color: var(--yellow)">WATCHING</span>
-          Episode 4
-          <span class="from">from Binging</span>
-        </div>
+      <!-- WIDGETS: tap the bolt to choose which ones show, and their size -->
+      <div class="title-row widgets-head">
+        <p class="pixel" style="font-size: 10px; color: var(--purple); margin: 0">WIDGETS</p>
+        <button type="button" class="small-btn bolt" id="widget-btn" aria-label="Choose widgets"><i class="ti ti-bolt"></i></button>
       </div>
+      <div class="widgets" id="widgets"></div>
     </section>
 
     <!-- PAGE: REMINDERS -->
@@ -775,7 +828,10 @@
       <p class="date"><span id="record-sub">Everything so far</span><span id="record-total" class="score pixel" style="color: var(--purple); text-shadow: none"></span></p>
       <!-- Filter buttons (only on the Record you open from Home) -->
       <div class="opts" id="record-filters" style="margin-bottom: 6px"></div>
-      <p class="hint" style="margin: 0 0 4px">Tap a day to fold or unfold it.</p>
+      <div class="title-row" style="margin: 0 0 4px">
+        <p class="hint" style="margin: 0">Tap a day to fold or unfold it.</p>
+        <button type="button" class="small-btn" id="fold-all"></button>
+      </div>
       <div id="record-list"></div>
     </section>
 
@@ -889,6 +945,11 @@
         </div>
       </div>
 
+      <!-- DETAILS: extra notes. Not shown on the Home list, but shown when you tap it -->
+      <label><span>Details <small>(optional)</small></span>
+        <textarea id="f-notes" rows="3" placeholder="Room 12, bring the blue folder"></textarea>
+      </label>
+
       <p class="error" id="f-error"></p>
 
       <div class="buttons">
@@ -897,6 +958,34 @@
         <button type="submit" class="primary">Save</button>
       </div>
     </form>
+  </div>
+
+  <!-- POP-UP PANEL: the details of a task, reminder or event -->
+  <div class="sheet hidden" id="detail-sheet">
+    <div class="panel glow-cyan" id="detail-panel">
+      <p class="detail-kind pixel" id="d-kind"></p>
+      <h2 class="detail-name" id="d-name"></h2>
+      <p class="detail-when" id="d-when"></p>
+      <div class="detail-notes" id="d-notes"></div>
+      <div class="buttons">
+        <button type="button" class="danger" id="d-check"></button>
+        <button type="button" id="d-close">Close</button>
+        <button type="button" class="primary" id="d-edit"><i class="ti ti-pencil"></i> Edit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POP-UP PANEL: choose your widgets -->
+  <div class="sheet hidden" id="widget-sheet">
+    <div class="panel glow-yellow">
+      <h2 class="pixel" style="color: var(--yellow); text-shadow: 0 0 8px var(--yellow)"><i class="ti ti-bolt"></i> WIDGETS</h2>
+      <p class="imp-label" style="margin: 0">On your Home</p>
+      <div class="fields" id="w-current"></div>
+      <p class="imp-label" style="margin: 8px 0 0">Add a widget</p>
+      <div class="fields" id="w-add"></div>
+      <p class="hint" style="margin: 0">More pages get their widgets as we build them.</p>
+      <div class="buttons"><button type="button" class="primary" id="w-done">Done</button></div>
+    </div>
   </div>
 
   <!-- POP-UP PANEL: Suggestions, grouped by category (hidden until needed) -->
@@ -1106,10 +1195,12 @@
     items.forEach(function (i) { if (!i.type) i.type = 'task'; });   // older tasks didn't have a type yet
     function saveItems() { save('brainfog-tasks', items); }
 
+    const folded = {};   // days you folded (or unfolded) yourself, in the Records and the Reminders page
+
     // STEP 3: Your routine is set in Calendar → Routine (see STEP 12). Home shows the blocks for each day.
 
     // STEP 4: Draw one row of a list
-    function makeRow(item) {
+    function makeRow(item, opts) {
       const row = document.createElement('div');
       row.className = 'item ' + item.kind + (item.data.done ? ' done' : '');
 
@@ -1163,7 +1254,7 @@
           chip.style.background = tint(cat.color, 0.18);
           name.insertBefore(chip, name.firstChild);
         }
-        time.onclick = name.onclick = function () { openSheet(item.data); };   // tap to edit
+        time.onclick = name.onclick = function () { openDetail(item.data); };   // tap to see details
       } else {
         slot.innerHTML = '<div class="check"></div>';
         slot.onclick = function () {
@@ -1174,8 +1265,23 @@
           saveItems();
           updateScore();
         };
-        // Tapping the time or name opens it for editing
-        time.onclick = name.onclick = function () { openSheet(item.data); };
+        // Tapping the time or name shows its details (and from there you can edit it)
+        time.onclick = name.onclick = function () { openDetail(item.data); };
+      }
+
+      // Details: a small note icon on the list; the details text itself only where asked
+      if (item.data.notes && item.kind !== 'routine') {
+        const showHere = opts && opts.notesFor && opts.notesFor.indexOf(item.kind) !== -1;
+        if (showHere) {
+          const notes = document.createElement('span');
+          notes.className = 'notes';
+          notes.textContent = item.data.notes;
+          name.appendChild(notes);
+        } else {
+          const icon = document.createElement('i');
+          icon.className = 'ti ti-notes has-notes';
+          name.appendChild(icon);
+        }
       }
 
       row.append(time, name, slot);
@@ -1198,15 +1304,15 @@
     }
 
     // Draw a day's list into a box, with the yellow dashed line between the two parts
-    function fillList(box, day) {
+    function fillList(box, day, opts) {
       box.innerHTML = '';
-      day.untimed.forEach(function (entry) { box.appendChild(makeRow(entry)); });
+      day.untimed.forEach(function (entry) { box.appendChild(makeRow(entry, opts)); });
       if (day.untimed.length && day.timed.length) {
         const line = document.createElement('div');
         line.className = 'divider';
         box.appendChild(line);
       }
-      day.timed.forEach(function (entry) { box.appendChild(makeRow(entry)); });
+      day.timed.forEach(function (entry) { box.appendChild(makeRow(entry, opts)); });
     }
 
     // STEP 6: The HOME list
@@ -1218,6 +1324,7 @@
         box.innerHTML = '<div class="empty">Nothing yet. Tap "+ Add" below.</div>';
       }
       updateScore();
+      drawWidgets();
     }
 
     // The score only counts things that have a check
@@ -1251,22 +1358,44 @@
       tomorrow.setDate(tomorrow.getDate() + 1);
 
       days.forEach(function (key) {
-        const heading = document.createElement('h2');
-        heading.className = 'day-heading pixel';
-        heading.textContent = key === todayKey() ? 'TODAY' : key === dateKey(tomorrow) ? 'TOMORROW' : niceDate(key).toUpperCase();
-        page.appendChild(heading);
-
         // Only the reminders of that day (no routine, events or tasks here)
         const all = itemsForDay(key);
         const onlyReminders = {
           untimed: all.untimed.filter(function (e) { return e.kind === 'reminder'; }),
           timed:   all.timed.filter(function (e) { return e.kind === 'reminder'; })
         };
+        const count = onlyReminders.untimed.length + onlyReminders.timed.length;
+
+        // A heading you can tap to fold or unfold that day
+        const foldKey = 'reminders ' + key;
+        const isFolded = !!folded[foldKey];
+        const title = key === todayKey() ? 'TODAY' : key === dateKey(tomorrow) ? 'TOMORROW' : niceDate(key).toUpperCase();
+        page.appendChild(foldHeading(title, count + ' REMINDER' + (count === 1 ? '' : 'S'), isFolded, 'var(--green)', function () {
+          folded[foldKey] = !isFolded;
+          drawReminders();
+        }));
+        if (isFolded) return;
+
         const box = document.createElement('div');
         box.className = 'list glow-cyan';
-        fillList(box, onlyReminders);
+        fillList(box, onlyReminders, { notesFor: ['reminder'] });   // show each reminder's details here
         page.appendChild(box);
       });
+    }
+
+    // A day heading you can tap to fold/unfold (used by the Records and the Reminders page)
+    function foldHeading(title, scoreText, isFolded, color, onTap) {
+      const head = document.createElement('button');
+      head.type = 'button';
+      head.className = 'record-head' + (isFolded ? ' folded' : '');
+      head.innerHTML = '<span class="day-heading pixel"><i class="ti ti-chevron-down chev"></i><span></span></span><span class="score pixel"></span>';
+      head.querySelector('.day-heading').style.color = color;
+      head.querySelector('.day-heading').style.textShadow = '0 0 6px ' + color;
+      head.querySelector('.day-heading span').textContent = title;
+      head.querySelector('.score').textContent = scoreText;
+      head.querySelector('.score').style.color = color;
+      head.onclick = onTap;
+      return head;
     }
 
     // STEP 8: Switching pages with the bar buttons
@@ -1320,7 +1449,6 @@
     // Tap a day's heading to fold or unfold it.
     let recordFrom = 'home';      // which page opened the Record
     let recordFilter = 'all';     // 'all', 'task', 'reminder' or 'event'
-    const folded = {};            // days you folded (or unfolded) yourself
 
     function openRecord(from, filter) {
       recordFrom = from;
@@ -1372,6 +1500,16 @@
       past.forEach(function (i) { if (days.indexOf(i.date) === -1) days.push(i.date); });
       days.sort().reverse();
 
+      // The Fold all / Unfold all button
+      const isFoldedAt = function (key, n) { const k = recordFilter + ' ' + key; return k in folded ? folded[k] : n >= 2; };
+      const allFolded = days.length > 0 && days.every(isFoldedAt);
+      field('fold-all').innerHTML = allFolded ? '<i class="ti ti-arrows-vertical"></i>Unfold all' : '<i class="ti ti-fold"></i>Fold all';
+      field('fold-all').classList.toggle('hidden', !days.length);
+      field('fold-all').onclick = function () {
+        days.forEach(function (key) { folded[recordFilter + ' ' + key] = !allFolded; });
+        drawRecord();
+      };
+
       // Totals at the top: completed out of checkable, and how many events
       const checkable = past.filter(function (i) { return i.type !== 'event'; });
       const doneAll = checkable.filter(function (i) { return i.done; }).length;
@@ -1404,20 +1542,16 @@
         const isFolded = foldKey in folded ? folded[foldKey] : n >= 2;
 
         // The heading (tap it to fold/unfold)
-        const head = document.createElement('button');
-        head.type = 'button';
-        head.className = 'record-head' + (isFolded ? ' folded' : '');
-        head.innerHTML = '<span class="day-heading pixel" style="color: var(--purple); text-shadow: none"><i class="ti ti-chevron-down chev"></i><span></span></span><span class="score pixel"></span>';
         let title = niceDate(key).toUpperCase();
         if (key === todayKey()) title = 'TODAY (SO FAR)';
         else if (key > todayKey()) title += ' (EARLY)';
-        head.querySelector('.day-heading span').textContent = title;
         const score = [];
         if (dayCheckable.length) score.push(key >= todayKey() ? doneCount + ' DONE' : 'CLEAR ' + doneCount + '/' + dayCheckable.length);
         if (dayEvents) score.push(dayEvents + ' EVENT' + (dayEvents === 1 ? '' : 'S'));
-        head.querySelector('.score').textContent = score.join(' · ');
-        head.onclick = function () { folded[foldKey] = !isFolded; drawRecord(); };
-        page.appendChild(head);
+        page.appendChild(foldHeading(title, score.join(' · '), isFolded, 'var(--purple)', function () {
+          folded[foldKey] = !isFolded;
+          drawRecord();
+        }));
         if (isFolded) return;
 
         const box = document.createElement('div');
@@ -1557,6 +1691,7 @@
       field('f-start').value = editing && editing.start ? editing.start : '';
       field('f-end').value   = editing && editing.end ? editing.end : '';
       field('f-dur').value   = editing ? lengthOf(editing) : 0;
+      field('f-notes').value = editing && editing.notes ? editing.notes : '';
       field('f-date').min = todayKey();
 
       // Open on "Duration" when it has a duration but no start (there's no end time to show)
@@ -1613,7 +1748,8 @@
 
       const data = { type: kind, name: name, date: date, start: start, end: end, dur: dur,
                      imp: kind === 'event' ? 0 : importance,
-                     cat: kind === 'event' ? eventCats.value : '' };
+                     cat: kind === 'event' ? eventCats.value : '',
+                     notes: field('f-notes').value.trim() };
       if (editing) {
         Object.assign(editing, data);
         if (kind === 'event') editing.done = false;   // events have no check
@@ -1631,6 +1767,72 @@
       items = items.filter(function (i) { return i !== editing; });
       saveItems();
       closeSheet();
+      redraw();
+    };
+
+    // STEP 9c: THE DETAILS VIEW. Tap a task, reminder or event on a list to see everything about it,
+    // including its details. From here you can check it off, or tap Edit to change it.
+    let detailItem = null;
+    const KIND_LOOK = {
+      task:     { label: 'TASK',     color: 'var(--pink)',   glow: 'glow-pink' },
+      reminder: { label: 'REMINDER', color: 'var(--green)',  glow: 'glow-cyan' },
+      event:    { label: 'EVENT',    color: 'var(--yellow)', glow: 'glow-yellow' }
+    };
+
+    function openDetail(i) {
+      detailItem = i;
+      const look = KIND_LOOK[i.type];
+      field('detail-panel').className = 'panel ' + look.glow;
+
+      // Top line: the kind, its category (events) and its importance stars
+      const kindLine = field('d-kind');
+      kindLine.innerHTML = '';
+      const label = document.createElement('span');
+      label.textContent = look.label;
+      label.style.color = look.color;
+      kindLine.appendChild(label);
+      const cat = i.type === 'event' ? catById(i.cat) : null;
+      if (cat) {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.textContent = cat.name.toUpperCase();
+        chip.style.color = cat.color;
+        chip.style.background = tint(cat.color, 0.18);
+        kindLine.appendChild(chip);
+      }
+      const stars = starsFor(i);
+      if (stars) kindLine.appendChild(stars);
+
+      field('d-name').textContent = i.name;
+      field('d-when').textContent = whenText(i);
+
+      const notes = field('d-notes');
+      notes.textContent = i.notes || 'No details yet. Tap Edit to add some.';
+      notes.classList.toggle('empty-notes', !i.notes);
+
+      // Tasks and reminders can be checked off from here; events can't
+      const check = field('d-check');
+      check.classList.toggle('hidden', i.type === 'event');
+      check.classList.add('done-btn');
+      check.classList.remove('danger');
+      check.innerHTML = i.done ? '<i class="ti ti-square"></i> Not done' : '<i class="ti ti-square-check"></i> Done';
+
+      field('detail-sheet').classList.remove('hidden');
+    }
+    function closeDetail() { field('detail-sheet').classList.add('hidden'); detailItem = null; }
+
+    field('d-close').onclick = closeDetail;
+    field('detail-sheet').onclick = function (e) { if (e.target === field('detail-sheet')) closeDetail(); };
+    field('d-edit').onclick = function () {
+      const i = detailItem;
+      closeDetail();
+      openSheet(i);
+    };
+    field('d-check').onclick = function () {
+      detailItem.done = !detailItem.done;
+      if (detailItem.done) detailItem.dropped = false;
+      saveItems();
+      closeDetail();
       redraw();
     };
 
@@ -2796,7 +2998,7 @@
       const noRoutine = function (e) { return e.kind !== 'routine'; };
       const day = { untimed: all.untimed.filter(noRoutine), timed: all.timed.filter(noRoutine) };
       const box = field('mday-list');
-      fillList(box, day);
+      fillList(box, day, { notesFor: ['event'] });   // events show their details here
       if (!day.untimed.length && !day.timed.length) {
         box.innerHTML = '<div class="empty">Nothing planned for this day.</div>';
       }
@@ -2813,6 +3015,248 @@
     };
     // "+ Add event" opens the usual panel, already set to Event on the day you picked
     field('mday-add').onclick = function () { openSheet(null, 'event', selectedDay); };
+
+    // STEP 14: WIDGETS on Home. Each page can have a widget in 3 sizes, like iPhone widgets:
+    //   small (half width), medium (full width, short), large (full width, tall).
+    // Tap the bolt to add, resize, move or remove them. Tap a widget to open its page.
+    let widgets = (function () {
+      try {
+        const saved = localStorage.getItem('brainfog-widgets');
+        if (saved !== null) return JSON.parse(saved);
+      } catch (e) { }
+      // The first time: start with two small ones
+      return [ { id: 'w1', page: 'reminders', size: 'small' }, { id: 'w2', page: 'calendar', size: 'small' } ];
+    })();
+    function saveWidgets() { save('brainfog-widgets', widgets); }
+
+    // Helpers for widgets
+    function shortWhen(i, compact) {
+      // compact (small widgets): today shows just the time, like "17:00"
+      if (compact && i.date === todayKey()) return i.start || 'Today';
+      if (compact && i.date === daysFromToday(1)) return 'Tmrw';
+      if (compact && i.date <= daysFromToday(6)) return fromKey(i.date).toLocaleDateString('en-US', { weekday: 'short' });
+      if (compact) return shortDate(fromKey(i.date));
+      let when;
+      if (i.date === todayKey()) when = 'Today';
+      else if (i.date === daysFromToday(1)) when = 'Tomorrow';
+      else if (i.date <= daysFromToday(6)) when = fromKey(i.date).toLocaleDateString('en-US', { weekday: 'short' });
+      else when = shortDate(fromKey(i.date));
+      return i.start ? when + ' ' + i.start : when;
+    }
+    function upcomingEvents() {
+      return items.filter(function (i) { return i.type === 'event' && i.date >= todayKey() && !eventHappened(i); })
+        .sort(function (a, b) { return (a.date + (a.start || '')) < (b.date + (b.start || '')) ? -1 : 1; });
+    }
+    function upcomingReminders() {
+      return items.filter(function (i) { return i.type === 'reminder' && !i.done && !i.dropped && i.date >= todayKey(); })
+        .sort(byPressing);   // most important first, then the closest date
+    }
+    // One line: name (with stars) on the left, when on the right; details underneath if asked
+    function widgetRow(box, i, withNotes, compact) {
+      const row = document.createElement('div');
+      row.className = 'wrow';
+      row.innerHTML = '<span class="wn"></span><span class="ww"></span>';
+      row.querySelector('.wn').textContent = i.name;
+      const stars = starsFor(i);
+      if (stars) row.querySelector('.wn').appendChild(stars);
+      row.querySelector('.ww').textContent = shortWhen(i, compact);
+      box.appendChild(row);
+      if (withNotes && i.notes) {
+        const notes = document.createElement('div');
+        notes.className = 'wnotes';
+        notes.textContent = i.notes;
+        box.appendChild(notes);
+      }
+    }
+    function widgetEmpty(box, text) {
+      const p = document.createElement('p');
+      p.className = 'wempty';
+      p.textContent = text;
+      box.appendChild(p);
+    }
+
+    // What each page's widget looks like, in each size
+    const WIDGET_TYPES = {
+      calendar: {
+        name: 'Calendar', icon: 'ti-calendar', color: '#ffe14d',
+        open: function () { showPage('calendar'); setCalView('month'); },
+        small: function (box) {            // the next 3 events
+          const list = upcomingEvents().slice(0, 3);
+          if (!list.length) return widgetEmpty(box, 'No events coming up.');
+          list.forEach(function (i) { widgetRow(box, i, false, true); });
+        },
+        medium: function (box) {           // this week, day by day
+          const week = document.createElement('div');
+          week.className = 'wweek';
+          const start = weekStartOf(new Date());
+          for (let d = 0; d < 7; d++) {
+            const key = dateKey(addDays(start, d));
+            const day = document.createElement('div');
+            day.className = 'wd' + (key === todayKey() ? ' today' : '');
+            day.innerHTML = '<b></b>';
+            day.firstChild.textContent = DAY_LETTERS[d];
+            const dayEvents = items.filter(function (i) { return i.type === 'event' && i.date === key; })
+              .sort(function (a, b) { return (a.start || '') < (b.start || '') ? -1 : 1; });
+            dayEvents.slice(0, 2).forEach(function (ev) {
+                const tag = document.createElement('span');
+                tag.className = 'we';
+                tag.textContent = ev.name;
+                const cat = catById(ev.cat);
+                if (cat) { tag.style.color = cat.color; tag.style.background = tint(cat.color, 0.18); }
+                day.appendChild(tag);
+              });
+            if (dayEvents.length > 2) {                       // "+1" when there are more
+              const more = document.createElement('span');
+              more.className = 'wmore';
+              more.textContent = '+' + (dayEvents.length - 2);
+              day.appendChild(more);
+            }
+            week.appendChild(day);
+          }
+          box.appendChild(week);
+        },
+        large: function (box) {            // the month on the left, the next 5 events on the right
+          const split = document.createElement('div');
+          split.className = 'wsplit';
+          const left = document.createElement('div');
+          const right = document.createElement('div');
+          split.append(left, right);
+          box.appendChild(split);
+          const month = document.createElement('div');
+          month.className = 'wmonth';
+          DAY_LETTERS.forEach(function (l) { const h = document.createElement('span'); h.className = 'h'; h.textContent = l; month.appendChild(h); });
+          const now = new Date();
+          const first = new Date(now.getFullYear(), now.getMonth(), 1);
+          const start = weekStartOf(first);
+          for (let n = 0; n < 42; n++) {
+            const date = addDays(start, n);
+            if (n % 7 === 0 && n > 0 && date.getMonth() !== now.getMonth() && date > first) break;
+            const key = dateKey(date);
+            const cell = document.createElement('span');
+            let cls = date.getMonth() !== now.getMonth() ? 'o' : '';
+            if (key === todayKey()) cls += ' t';
+            if (items.some(function (i) { return i.type === 'event' && i.date === key; })) cls += ' ev';
+            cell.className = cls;
+            cell.textContent = date.getDate();
+            month.appendChild(cell);
+          }
+          left.appendChild(month);
+          const label = document.createElement('p');
+          label.className = 'wday';
+          label.textContent = 'NEXT';
+          right.appendChild(label);
+          const next = upcomingEvents().slice(0, 5);   // the next 5 events
+          if (!next.length) widgetEmpty(right, 'No events coming up.');
+          next.forEach(function (i) { widgetRow(right, i, false, true); });
+        }
+      },
+      reminders: {
+        name: 'Reminders', icon: 'ti-bell', color: '#5dff9b',
+        open: function () { showPage('reminders'); },
+        small: function (box) {            // the 3 most pressing
+          const list = upcomingReminders().slice(0, 3);
+          if (!list.length) return widgetEmpty(box, 'No reminders. Nice!');
+          list.forEach(function (i) { widgetRow(box, i, false, true); });
+        },
+        medium: function (box) {           // this week, most pressing first
+          const list = upcomingReminders().filter(function (i) { return i.date <= daysFromToday(6); }).slice(0, 3);
+          if (!list.length) return widgetEmpty(box, 'Nothing this week.');
+          list.forEach(function (i) { widgetRow(box, i, false); });
+        },
+        large: function (box) {            // even more, with their details
+          const list = upcomingReminders().slice(0, 5);
+          if (!list.length) return widgetEmpty(box, 'No reminders. Nice!');
+          list.forEach(function (i) { widgetRow(box, i, true); });
+        }
+      }
+    };
+    const SIZE_NAMES = { small: 'Small', medium: 'Medium', large: 'Large' };
+
+    function drawWidgets() {
+      const box = field('widgets');
+      box.innerHTML = '';
+      widgets.forEach(function (w) {
+        const type = WIDGET_TYPES[w.page];
+        if (!type) return;
+        const el = document.createElement('div');
+        el.className = 'widget ' + w.size;
+        el.style.setProperty('--c', type.color);
+        const title = document.createElement('p');
+        title.className = 'wtitle';
+        title.innerHTML = '<i class="ti ' + type.icon + '"></i><span></span>';
+        title.querySelector('span').textContent = type.name.toUpperCase();
+        el.appendChild(title);
+        type[w.size](el);
+        el.onclick = type.open;
+        box.appendChild(el);
+      });
+      if (!widgets.length) {
+        box.innerHTML = '<p class="shelf-empty" style="grid-column: span 2">No widgets yet. Tap the bolt to add some.</p>';
+      }
+    }
+
+    // ---- The widget chooser (the bolt) ----
+    function drawWidgetChooser() {
+      const current = field('w-current');
+      current.innerHTML = '';
+      if (!widgets.length) current.innerHTML = '<p class="shelf-empty">None yet.</p>';
+      widgets.forEach(function (w, n) {
+        const row = document.createElement('div');
+        row.className = 'w-row';
+        row.innerHTML = '<span class="wname"></span>';
+        row.querySelector('.wname').textContent = WIDGET_TYPES[w.page].name;
+        const buttons = [
+          { cls: 'wsize', html: SIZE_NAMES[w.size], label: 'Change size', run: function () {
+            const order = ['small', 'medium', 'large'];
+            w.size = order[(order.indexOf(w.size) + 1) % 3];
+          } },
+          { cls: '', html: '<i class="ti ti-arrow-up"></i>', label: 'Move up', run: function () {
+            if (n > 0) widgets.splice(n - 1, 0, widgets.splice(n, 1)[0]);
+          } },
+          { cls: '', html: '<i class="ti ti-arrow-down"></i>', label: 'Move down', run: function () {
+            if (n < widgets.length - 1) widgets.splice(n + 1, 0, widgets.splice(n, 1)[0]);
+          } },
+          { cls: 'wdel', html: '<i class="ti ti-x"></i>', label: 'Remove', run: function () { widgets.splice(n, 1); } }
+        ];
+        buttons.forEach(function (b) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = b.cls;
+          btn.innerHTML = b.html;
+          btn.setAttribute('aria-label', b.label);
+          btn.onclick = function () { b.run(); saveWidgets(); drawWidgetChooser(); drawWidgets(); };
+          row.appendChild(btn);
+        });
+        current.appendChild(row);
+      });
+
+      const add = field('w-add');
+      add.innerHTML = '';
+      Object.keys(WIDGET_TYPES).forEach(function (page) {
+        const row = document.createElement('div');
+        row.className = 'w-row';
+        row.innerHTML = '<span class="wname"></span>';
+        row.querySelector('.wname').textContent = WIDGET_TYPES[page].name;
+        ['small', 'medium', 'large'].forEach(function (size) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'wsize';
+          btn.textContent = SIZE_NAMES[size][0];     // S, M, L
+          btn.setAttribute('aria-label', 'Add ' + SIZE_NAMES[size]);
+          btn.onclick = function () {
+            widgets.push({ id: newId(), page: page, size: size });
+            saveWidgets();
+            drawWidgetChooser();
+            drawWidgets();
+          };
+          row.appendChild(btn);
+        });
+        add.appendChild(row);
+      });
+    }
+    field('widget-btn').onclick = function () { drawWidgetChooser(); field('widget-sheet').classList.remove('hidden'); };
+    field('w-done').onclick = function () { field('widget-sheet').classList.add('hidden'); };
+    field('widget-sheet').onclick = function (e) { if (e.target === field('widget-sheet')) field('widget-sheet').classList.add('hidden'); };
 
     // STEP 11: Start everything
     let shownDay = '';
