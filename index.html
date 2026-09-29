@@ -7,6 +7,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="BrainFog">   <!-- the name under the icon -->
+  <meta name="theme-color" content="#0d0b1e">
+  <link rel="apple-touch-icon" href="icon.png">                 <!-- the Home Screen icon -->
+  <link rel="icon" type="image/png" href="icon.png">
   <title>BrainFog</title>
 
   <!-- The fonts (pixel for titles, Chakra Petch for everything else) and the icon set -->
@@ -43,6 +47,7 @@
       background: var(--bg);
       color: var(--text);
       font-family: 'Chakra Petch', sans-serif;
+      overscroll-behavior: none;       /* stops the whole screen from bouncing on iPhone */
     }
 
     /* Pixel font, used only for titles so the list stays easy to read */
