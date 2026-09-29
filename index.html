@@ -272,19 +272,18 @@
 
 
     /* ---- Widgets on Home (like iPhone widgets) ----
-       The grid has 3 columns, and counts height in small steps (2 steps = a column's width):
-         small  = 1 column,  2 steps → a square, half as tall as a large (3 fit in a row)
-         medium = 3 columns, 3 steps → a full row, 3/4 as tall as a large
-         large  = 3 columns, 4 steps → a full row */
+       The grid has 3 columns. Each size keeps its own shape (width : height),
+       so they look the same on any screen. On a phone about 390px wide:
+         small  = 1 column, a square        → 113 × 113 (3 fit in a row)
+         medium = a full row                → 358 × 174
+         large  = a full row, a bit taller  → 358 × 215
+       To make one taller or shorter, change its "aspect-ratio" (the second number is the height). */
     .widgets-head { margin: 4px 0 10px; }
     .small-btn.bolt { color: var(--yellow); border-color: rgba(255, 225, 77, 0.6); padding: 6px 10px; }
     .small-btn.bolt i { font-size: 18px; }
-    #page-home { container-type: inline-size; }  /* lets the widget rows match the column width */
     .widgets {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      grid-auto-rows: 50px;                     /* backup for older phones */
-      grid-auto-rows: calc(((100cqw - 20px) / 3 - 10px) / 2);   /* half of a square, minus the gap */
       gap: 10px;
     }
     .widget {
@@ -296,9 +295,9 @@
       font-size: 12px;
       -webkit-tap-highlight-color: transparent;
     }
-    .widget.small  { grid-column: span 1; grid-row: span 2; }
-    .widget.medium { grid-column: span 3; grid-row: span 3; }
-    .widget.large  { grid-column: span 3; grid-row: span 4; }
+    .widget.small  { grid-column: span 1; aspect-ratio: 1 / 1; }
+    .widget.medium { grid-column: span 3; aspect-ratio: 358 / 115; }
+    .widget.large  { grid-column: span 3; aspect-ratio: 358 / 170; }
     .widget .wtitle { font-family: 'Press Start 2P', monospace; font-size: 7px; color: var(--c); display: flex; align-items: center; gap: 5px; margin: 0 0 2px; }
     .widget .wtitle i { font-size: 12px; }
     .widget .wempty { color: var(--dim); font-size: 12px; margin: auto 0; }
@@ -346,6 +345,36 @@
     }
     .w-row .wsize { color: var(--yellow); border-color: rgba(255, 225, 77, 0.6); }
     .w-row .wdel { color: var(--red); border-color: var(--red); }
+
+
+    /* Repeats: Never / Weekly / Monthly / Yearly */
+    .reps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .repb {
+      font: inherit; font-size: 14px; padding: 9px 2px; border-radius: 10px;
+      background: var(--field); color: var(--dim);
+      border: 2px solid rgba(143, 138, 184, 0.35); cursor: pointer;
+    }
+    .repb.on { color: var(--text); border-color: var(--yellow); box-shadow: 0 0 8px rgba(255, 225, 77, 0.5); }
+    .repeat-tag { font-size: 11px; color: var(--yellow); margin-left: 6px; vertical-align: middle; }
+
+
+    /* Calendar switch with 3 choices */
+    .seg.seg3 { grid-template-columns: repeat(3, 1fr); }
+
+    /* The Upcoming box: shows about 8 events, then scrolls */
+    .upbox { border-radius: var(--round); padding: 4px 12px 10px; max-height: 470px; overflow-y: auto; overscroll-behavior: contain; }
+    .upbox .record-head { position: sticky; top: 0; z-index: 3; background: var(--bg); padding: 10px 0 6px; margin: 0; }
+    .item.upcoming { grid-template-columns: 42px 1fr 24px; }
+    .update { display: flex; flex-direction: column; align-items: center; line-height: 1.1; }
+    .update b { font-size: 18px; font-weight: 600; color: var(--yellow); }
+    .update span { font-size: 10px; color: var(--dim); text-transform: uppercase; }
+    .upwhen { display: block; font-size: 12px; color: var(--cyan); margin-top: 2px; }
+
+
+    /* The More page */
+    .more-box { border-radius: var(--round); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .more-title { font-size: 10px; margin: 0; display: flex; align-items: center; gap: 6px; }
+    .more-title i { font-size: 16px; }
 
     /* ---- The Suggestions panel ---- */
     .sugg-cat { display: flex; align-items: center; gap: 8px; font-size: 10px; margin: 8px 0 0; }
@@ -542,8 +571,8 @@
       font-size: 9px; padding: 2px 3px; border-radius: 4px; color: var(--yellow);
       border: 1px solid var(--yellow); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
     }
-    /* The hours part scrolls on its own: it shows 9 hours at a time */
-    .rscroll { overflow-y: auto; height: calc(var(--hour) * 9); overscroll-behavior: contain; }
+    /* The hours part scrolls on its own: it shows 7 hours at a time */
+    .rscroll { overflow-y: auto; height: calc(var(--hour) * 7); overscroll-behavior: contain; }
     .rhours { position: relative; }
     .rhours span { position: absolute; right: 4px; font-size: 9px; color: var(--dim); transform: translateY(-50%); }
     .rcol {
@@ -761,9 +790,10 @@
         <h1 class="page-title pixel">CALENDAR</h1>
         <button class="small-btn" id="cal-record-btn"><i class="ti ti-history"></i>Record</button>
       </div>
-      <div class="seg">
+      <div class="seg seg3">
         <button type="button" class="on" id="cal-routine">Routine</button>
         <button type="button" id="cal-month">Month</button>
+        <button type="button" id="cal-upcoming">Upcoming</button>
       </div>
 
       <div id="routine-view">
@@ -824,6 +854,17 @@
         <div class="list glow-cyan" id="mday-list"></div>
         <button type="button" class="add yellow" id="mday-add"><i class="ti ti-plus"></i> Add event</button>
       </div>
+
+      <!-- UPCOMING: every event coming up, grouped by month, in a box that scrolls -->
+      <div id="upcoming-view" class="hidden">
+        <div class="title-row" style="margin: 0 0 8px">
+          <p class="hint" style="margin: 0">Tap a month to fold or unfold it.</p>
+          <button type="button" class="small-btn" id="up-fold-all"></button>
+        </div>
+        <div class="upbox glow-yellow" id="upcoming-list"></div>
+        <p class="hint" style="margin: 8px 0 0">Repeating events show once, on their next date.</p>
+        <button type="button" class="add yellow" id="up-add" style="margin-top: 12px"><i class="ti ti-plus"></i> Add event</button>
+      </div>
     </section>
 
     <!-- PAGE: RECORD (past tasks and reminders: done or not done) -->
@@ -838,6 +879,25 @@
         <button type="button" class="small-btn" id="fold-all"></button>
       </div>
       <div id="record-list"></div>
+    </section>
+
+    <!-- PAGE: MORE (Backup and Restore for now; more sections will live here later) -->
+    <section id="page-more" class="hidden">
+      <h1 class="page-title pixel" style="color: var(--purple); text-shadow: 0 0 10px var(--purple)">MORE</h1>
+      <p class="date"><span>Extra sections and settings</span></p>
+
+      <div class="more-box glow-cyan">
+        <p class="pixel more-title" style="color: var(--green)"><i class="ti ti-device-floppy"></i> SAVE FILE</p>
+        <p class="hint" style="margin: 0">Everything in BrainFog lives only on this device. A backup puts it all in one small file you can keep safe, or open on another device.</p>
+        <button type="button" class="add green" id="backup-btn" style="margin: 0"><i class="ti ti-download"></i> Backup</button>
+        <p class="hint" id="backup-last" style="margin: 0"></p>
+        <div class="divider"></div>
+        <button type="button" class="add yellow" id="restore-btn" style="margin: 0"><i class="ti ti-upload"></i> Restore from a backup</button>
+        <p class="hint" style="margin: 0">Restore <b style="color: var(--yellow)">replaces</b> everything on this device with what's in the backup file.</p>
+        <input type="file" id="restore-file" class="hidden">
+      </div>
+
+      <p class="hint" style="margin: 16px 0 0">Finances and other sections will live here later.</p>
     </section>
 
     <!-- PAGE: LOCKED (for every area we haven't built yet) -->
@@ -884,6 +944,17 @@
           <button type="button" class="imp" data-imp="1">★</button>
           <button type="button" class="imp" data-imp="2">★★</button>
           <button type="button" class="imp" data-imp="3">★★★</button>
+        </div>
+      </div>
+
+      <!-- REPEATS (events only): never, every week, every month or every year -->
+      <div id="f-repeat-fields" class="hidden">
+        <p class="imp-label">Repeats</p>
+        <div class="reps">
+          <button type="button" class="repb" data-repeat="">Never</button>
+          <button type="button" class="repb" data-repeat="weekly">Weekly</button>
+          <button type="button" class="repb" data-repeat="monthly">Monthly</button>
+          <button type="button" class="repb" data-repeat="yearly">Yearly</button>
         </div>
       </div>
 
@@ -1154,9 +1225,60 @@
 
     function sortByTime(a, b) { return toMinutes(a.data.start) - toMinutes(b.data.start); }
 
+    // REPEATING EVENTS: an event can repeat every week, month or year, starting on its date.
+    // (Birthdays: put the date of any birthday, even a past one, and choose "Every year".)
+    const REPEAT_NAMES = { weekly: 'Every week', monthly: 'Every month', yearly: 'Every year' };
+    function parseKey(key) {
+      const p = key.split('-');
+      return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+    }
+    // Does this event happen on this day?
+    function occursOn(i, key) {
+      if (!i.repeat) return i.date === key;
+      if (key < i.date) return false;
+      const a = parseKey(i.date);
+      const b = parseKey(key);
+      if (i.repeat === 'weekly')  return a.getDay() === b.getDay();
+      if (i.repeat === 'monthly') return a.getDate() === b.getDate();
+      if (i.repeat === 'yearly')  return a.getDate() === b.getDate() && a.getMonth() === b.getMonth();
+      return false;
+    }
+    // Is this thing on this day? (events use the repeat rule; everything else uses its date)
+    function onDay(i, key) {
+      return i.type === 'event' ? occursOn(i, key) : i.date === key;
+    }
+    // The first day, from startKey on, when this event happens (null = never again)
+    function nextOccurrence(i, startKey) {
+      if (!i.repeat) return i.date >= startKey ? i.date : null;
+      let d = parseKey(i.date > startKey ? i.date : startKey);
+      for (let n = 0; n < 400; n++) {                      // looks ahead a bit more than a year
+        const key = dateKey(d);
+        if (occursOn(i, key)) return key;
+        d.setDate(d.getDate() + 1);
+      }
+      return null;
+    }
+    // Every day between two dates when this event happens
+    function occurrencesBetween(i, firstKey, lastKey) {
+      const out = [];
+      if (lastKey < firstKey) return out;
+      let d = parseKey(firstKey);
+      for (let n = 0; n < 800 && dateKey(d) <= lastKey; n++) {
+        if (occursOn(i, dateKey(d))) out.push(dateKey(d));
+        d.setDate(d.getDate() + 1);
+      }
+      return out;
+    }
+    // A copy of a repeating event placed on one of its days (for showing it, not for saving)
+    function onDate(i, key) { return Object.assign({}, i, { date: key, original: i }); }
+
     // How long something lasts, in minutes: from start to end, or its own duration if it has no start
     function lengthOf(i) {
-      if (i.start && i.end) return toMinutes(i.end) - toMinutes(i.start);
+      if (i.start && i.end) {
+        let d = toMinutes(i.end) - toMinutes(i.start);
+        if (d < 0) d += 24 * 60;          // it goes past midnight (routine blocks can)
+        return d;
+      }
       return i.dur || 0;
     }
     // MOST PRESSING FIRST: higher importance first; if equal, the closest date first;
@@ -1259,6 +1381,13 @@
           chip.style.background = tint(cat.color, 0.18);
           name.insertBefore(chip, name.firstChild);
         }
+        if (item.data.repeat) {                             // a small "repeats" marker
+          const tag = document.createElement('span');
+          tag.className = 'repeat-tag';
+          tag.innerHTML = '<i class="ti ti-repeat"></i>';
+          tag.title = REPEAT_NAMES[item.data.repeat];
+          name.appendChild(tag);
+        }
         time.onclick = name.onclick = function () { openDetail(item.data); };   // tap to see details
       } else {
         slot.innerHTML = '<div class="check"></div>';
@@ -1299,7 +1428,7 @@
       const timed = [];
       routineForDay(key).forEach(function (r) { timed.push({ kind: 'routine', data: r }); });
       items.forEach(function (i) {
-        if (i.date !== key || i.dropped) return;
+        if (i.dropped || !onDay(i, key)) return;
         const entry = { kind: i.type, data: i };
         if (i.start) timed.push(entry); else untimed.push(entry);
       });
@@ -1410,7 +1539,7 @@
     };
     let currentPage = 'home';
 
-    const builtPages = ['home', 'reminders', 'record', 'calendar'];   // pages that exist; the rest show "Locked"
+    const builtPages = ['home', 'reminders', 'record', 'calendar', 'more'];   // pages that exist; the rest show "Locked"
 
     function showPage(page) {
       currentPage = page;
@@ -1427,7 +1556,7 @@
       if (builtPages.indexOf(page) === -1) document.getElementById('locked-name').textContent = pageNames[page];
       redraw();
       document.getElementById('main').scrollTop = 0;
-      if (page === 'calendar') field('rgrid-scroll').scrollTop = OPEN_AT * HOUR_H;   // start at 05:00
+      if (page === 'calendar') field('rgrid-scroll').scrollTop = (OPEN_AT - DAY_START) * HOUR_H;   // start at 05:00
     }
     document.querySelectorAll('.tab').forEach(function (tab) {
       tab.onclick = function () { showPage(tab.dataset.page); };
@@ -1442,6 +1571,7 @@
       if (currentPage === 'reminders') drawReminders();
       else if (currentPage === 'record') drawRecord();
       else if (currentPage === 'calendar') drawCalendar();
+      else if (currentPage === 'more') drawMore();
       else drawHome();
     }
 
@@ -1494,8 +1624,18 @@
         filterBox.appendChild(btn);
       });
 
-      // What goes in the record, for this filter
-      const past = items.filter(function (i) {
+      // What goes in the record, for this filter.
+      // A repeating event goes in once for every day it happened (up to 2 years back).
+      const pool = [];
+      items.forEach(function (i) {
+        if (i.type === 'event' && i.repeat) {
+          const from = i.date > daysFromToday(-730) ? i.date : daysFromToday(-730);
+          occurrencesBetween(i, from, todayKey()).forEach(function (key) { pool.push(onDate(i, key)); });
+        } else {
+          pool.push(i);
+        }
+      });
+      const past = pool.filter(function (i) {
         if (recordFilter !== 'all' && i.type !== recordFilter) return false;
         if (i.type === 'event') return eventHappened(i);
         return i.date < todayKey() || i.done;
@@ -1627,6 +1767,7 @@
     let editing = null;       // the item being edited, or null when adding a new one
     let kind = 'task';        // which check is on: 'task', 'reminder' or 'event'
     let importance = 0;       // 0 = none, 1 to 3 stars
+    let repeat = '';          // '' = never, or 'weekly', 'monthly', 'yearly' (events only)
     let mode = 'end';         // "end" = you type the end time, "dur" = you pick a duration
 
     function field(id) { return document.getElementById(id); }
@@ -1665,10 +1806,22 @@
       field('sheet-title').textContent = (editing ? 'EDIT ' : 'NEW ') + kind.toUpperCase();
       field('imp-fields').classList.toggle('hidden', kind === 'event');       // events don't need importance
       field('f-cat-fields').classList.toggle('hidden', kind !== 'event');     // ...but they can have a category
+      field('f-repeat-fields').classList.toggle('hidden', kind !== 'event');  // ...and they can repeat
       errorText.textContent = '';
     }
     document.querySelectorAll('.kind').forEach(function (btn) {
       btn.onclick = function () { setKind(btn.dataset.kind); };
+    });
+
+    // Pick how an event repeats (only one can be on)
+    function setRepeat(value) {
+      repeat = value;
+      document.querySelectorAll('.repb').forEach(function (btn) {
+        btn.classList.toggle('on', btn.dataset.repeat === value);
+      });
+    }
+    document.querySelectorAll('.repb').forEach(function (btn) {
+      btn.onclick = function () { setRepeat(btn.dataset.repeat); errorText.textContent = ''; };
     });
 
     // Pick an importance level (only one can be on)
@@ -1704,6 +1857,7 @@
       setKind(editing ? editing.type : (startKind || 'task'));
       setImportance(editing ? (editing.imp || 0) : 0);
       eventCats.open(editing ? editing.cat : '');
+      setRepeat(editing && editing.repeat ? editing.repeat : '');
       showFitBox();
       sheet.classList.remove('hidden');
     }
@@ -1726,7 +1880,8 @@
       if (!name) { errorText.textContent = 'Give it a name.'; return; }
 
       const date = field('f-date').value || todayKey();    // no date → today
-      if (date < todayKey() && !(editing && editing.date === date)) {
+      const repeating = kind === 'event' && repeat;
+      if (date < todayKey() && !(editing && editing.date === date) && !repeating) {
         errorText.textContent = 'Pick today or a later day.'; return;
       }
 
@@ -1754,7 +1909,8 @@
       const data = { type: kind, name: name, date: date, start: start, end: end, dur: dur,
                      imp: kind === 'event' ? 0 : importance,
                      cat: kind === 'event' ? eventCats.value : '',
-                     notes: field('f-notes').value.trim() };
+                     notes: field('f-notes').value.trim(),
+                     repeat: kind === 'event' ? repeat : '' };
       if (editing) {
         Object.assign(editing, data);
         if (kind === 'event') editing.done = false;   // events have no check
@@ -1809,7 +1965,9 @@
       if (stars) kindLine.appendChild(stars);
 
       field('d-name').textContent = i.name;
-      field('d-when').textContent = whenText(i);
+      field('d-when').textContent = i.repeat
+        ? REPEAT_NAMES[i.repeat] + ' · starting ' + whenText(i)
+        : whenText(i);
 
       const notes = field('d-notes');
       notes.textContent = i.notes || 'No details yet. Tap Edit to add some.';
@@ -2065,10 +2223,13 @@
     //   Permanent blocks: once placed on a day and time, they repeat EVERY week.
     //   Temporary blocks: placed only in ONE week. They stay on the shelf to place again later.
     // A permanent block can be skipped for one week (for example, when a temporary block replaces it).
-    const DAY_START = 0;            // the grid starts at midnight...
-    const DAY_END = 24;             // ...and ends at the next midnight
+    // The routine's day runs from 03:00 to 02:59 the next morning.
+    // Things after midnight show at the BOTTOM of the day before (like a night out),
+    // but they're saved on their real day (so Home shows them on the right day).
+    const DAY_START = 3;            // the grid starts at 03:00...
+    const DAY_END = 27;             // ...and ends at 03:00 the next day (27 = 24 + 3)
     const OPEN_AT = 5;              // when you open the page, it scrolls to 05:00
-    const HOUR_H = 44;              // pixels per hour in the grid (the box shows 9 hours)
+    const HOUR_H = 44;              // pixels per hour in the grid (the box shows 7 hours)
     const PX = HOUR_H / 60;         // pixels per minute
     const DAY_LETTERS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
     const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -2124,7 +2285,7 @@
     }
     function shortDate(d) { return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
     function blockById(id) { return routine.blocks.find(function (b) { return b.id === id; }); }
-    function endOf(start, dur) { return toTime(Math.min(toMinutes(start) + dur, 24 * 60)); }
+    function endOf(start, dur) { return toTime((toMinutes(start) + dur) % (24 * 60)); }   // wraps past midnight
 
     let viewWeek = weekStartOf(new Date());   // the week the grid is showing
     function viewWeekKey() { return dateKey(viewWeek); }
@@ -2151,6 +2312,7 @@
     // ---- Drawing the week grid ----
     function drawCalendar() {
       drawMonth();                                   // the Month view (STEP 13)
+      drawUpcoming();                                // the Upcoming view (STEP 13b)
       const scrollBox = field('rgrid-scroll');
       const keepScroll = scrollBox.scrollTop;        // redrawing shouldn't make the hours jump
       field('rgrid').style.setProperty('--hour', HOUR_H + 'px');
@@ -2169,11 +2331,6 @@
         head.appendChild(cell);
       }
 
-      // Events of this week (from the calendar, can't be moved here)
-      const weekEvents = items.filter(function (i) {
-        return i.type === 'event' && i.date >= weekKey && i.date <= dateKey(addDays(viewWeek, 6));
-      });
-
       // Row 2: events with no start time, as small tags on top
       const allday = field('rgrid-allday');
       allday.innerHTML = '<div></div>';
@@ -2182,8 +2339,8 @@
         const cell = document.createElement('div');
         cell.className = 'rcell';
         const key = dateKey(addDays(viewWeek, d));
-        weekEvents.forEach(function (ev) {
-          if (ev.date !== key || ev.start) return;
+        items.forEach(function (ev) {
+          if (ev.type !== 'event' || ev.start || !occursOn(ev, key)) return;
           anyAllday = true;
           const tag = document.createElement('div');
           tag.className = 'ev';
@@ -2205,37 +2362,65 @@
       const hours = document.createElement('div');
       hours.className = 'rhours';
       hours.style.height = height + 'px';
-      for (let h = DAY_START + 1; h < DAY_END; h++) {   // 01, 02 ... 23
+      for (let h = DAY_START + 1; h < DAY_END; h++) {   // 04, 05 ... 23, 00, 01, 02
         const label = document.createElement('span');
         label.style.top = ((h - DAY_START) * HOUR_H) + 'px';
-        label.textContent = String(h).padStart(2, '0');
+        label.textContent = String(h % 24).padStart(2, '0');
         hours.appendChild(label);
       }
       body.appendChild(hours);
 
+      // Which column "now" belongs to: before 03:00 it's still the day before
+      const now = new Date();
+      let nowMinutes = now.getHours() * 60 + now.getMinutes();
+      let nowColumn = todayKey();
+      if (nowMinutes < DAY_START * 60) { nowColumn = daysFromToday(-1); nowMinutes += 24 * 60; }
+
       for (let d = 0; d < 7; d++) {
-        const key = dateKey(addDays(viewWeek, d));
+        const date = addDays(viewWeek, d);
+        const key = dateKey(date);
+        const next = addDays(date, 1);                  // the morning after (00:00–02:59 goes here)
+        const nextKey = dateKey(next);
+        const nextWeek = dateKey(weekStartOf(next));
         const col = document.createElement('div');
         col.className = 'rcol' + (key === todayKey() ? ' today' : '');
         col.style.height = height + 'px';
         col.dataset.day = d;
+        col.dataset.date = key;
 
-        // Everything in this column: permanent, temporary and events
+        // Everything in this column. Times count from 00:00 of this column's day,
+        // so 01:00 the next morning counts as 25:00 (the bottom of the column).
         const entries = [];
         routine.perm.forEach(function (p) {
           const b = blockById(p.blockId);
-          if (!b || p.day !== d) return;
-          const skipped = p.skips.indexOf(weekKey) !== -1;
-          entries.push({ kind: skipped ? 'skipped' : 'perm', place: p, block: b, name: b.name, start: toMinutes(p.start), dur: b.dur });
+          if (!b) return;
+          const start = toMinutes(p.start);
+          let week = null, gm = null;
+          if (p.day === date.getDay() && start >= DAY_START * 60) { week = weekKey; gm = start; }
+          else if (p.day === next.getDay() && start < DAY_START * 60) { week = nextWeek; gm = start + 24 * 60; }
+          if (gm === null) return;
+          const skipped = p.skips.indexOf(week) !== -1;
+          entries.push({ kind: skipped ? 'skipped' : 'perm', place: p, block: b, name: b.name, start: gm, dur: b.dur, week: week });
         });
         routine.temp.forEach(function (t) {
           const b = blockById(t.blockId);
-          if (!b || t.week !== weekKey || t.day !== d) return;
-          entries.push({ kind: 'temp', place: t, block: b, name: b.name, start: toMinutes(t.start), dur: b.dur });
+          if (!b) return;
+          const real = dateKey(addDays(parseKey(t.week), t.day));   // the real day it's on
+          const start = toMinutes(t.start);
+          let gm = null;
+          if (real === key && start >= DAY_START * 60) gm = start;
+          else if (real === nextKey && start < DAY_START * 60) gm = start + 24 * 60;
+          if (gm === null) return;
+          entries.push({ kind: 'temp', place: t, block: b, name: b.name, start: gm, dur: b.dur, week: t.week });
         });
-        weekEvents.forEach(function (ev) {
-          if (ev.date !== key || !ev.start) return;
-          entries.push({ kind: 'event', name: ev.name, start: toMinutes(ev.start), dur: Math.max(lengthOf(ev), 30), cat: catById(ev.cat) });
+        items.forEach(function (ev) {
+          if (ev.type !== 'event' || !ev.start) return;
+          const start = toMinutes(ev.start);
+          let gm = null;
+          if (start >= DAY_START * 60 && occursOn(ev, key)) gm = start;
+          else if (start < DAY_START * 60 && occursOn(ev, nextKey)) gm = start + 24 * 60;
+          if (gm === null) return;
+          entries.push({ kind: 'event', name: ev.name, start: gm, dur: Math.max(lengthOf(ev), 30), cat: catById(ev.cat) });
         });
 
         // When things overlap, they STACK: the one that starts later (or is shorter) goes on top,
@@ -2267,16 +2452,12 @@
           col.appendChild(el);
         });
 
-        // The red "now" line on today
-        if (key === todayKey()) {
-          const now = new Date();
-          const minutes = now.getHours() * 60 + now.getMinutes();
-          if (minutes >= DAY_START * 60) {
-            const line = document.createElement('div');
-            line.className = 'rnow';
-            line.style.top = ((minutes - DAY_START * 60) * PX) + 'px';
-            col.appendChild(line);
-          }
+        // The red "now" line
+        if (key === nowColumn) {
+          const line = document.createElement('div');
+          line.className = 'rnow';
+          line.style.top = ((nowMinutes - DAY_START * 60) * PX) + 'px';
+          col.appendChild(line);
         }
         body.appendChild(col);
       }
@@ -2305,7 +2486,7 @@
       if (e.dur >= 45) {
         const t = document.createElement('span');
         t.className = 'bt';
-        t.textContent = toTime(e.start);
+        t.textContent = toTime(e.start % (24 * 60));   // 25:00 shows as 01:00
         el.appendChild(t);
       }
 
@@ -2314,7 +2495,7 @@
       } else if (e.kind === 'skipped') {
         el.onclick = function () { blockOptions(e); };
       } else {
-        el.onpointerdown = function (ev) { startDrag(ev, { from: 'grid', kind: e.kind, place: e.place, block: e.block, el: el }); };
+        el.onpointerdown = function (ev) { startDrag(ev, { from: 'grid', kind: e.kind, place: e.place, block: e.block, el: el, week: e.week }); };
       }
       return el;
     }
@@ -2384,7 +2565,7 @@
       drag = null;
       if (!d.moved) {                        // it was a tap
         if (d.from === 'shelf') openBlockSheet(d.block);
-        else blockOptions({ kind: d.kind, place: d.place, block: d.block });
+        else blockOptions({ kind: d.kind, place: d.place, block: d.block, week: d.week });
         return;
       }
       endDrag(d);
@@ -2434,7 +2615,7 @@
           const topPx = (drag.y - drag.grabY) - r.top;
           let start = DAY_START * 60 + Math.round(topPx / PX / 15) * 15;          // snap to 15 minutes
           start = Math.max(DAY_START * 60, Math.min(start, DAY_END * 60 - drag.block.dur));
-          target = { day: Number(col.dataset.day), start: start, col: col };
+          target = { day: Number(col.dataset.day), start: start, col: col, date: col.dataset.date };
         }
       });
       drag.target = target;
@@ -2450,7 +2631,7 @@
       }
       preview.style.top = ((target.start - DAY_START * 60) * PX) + 'px';
       preview.style.height = Math.max(drag.block.dur * PX - 2, 14) + 'px';
-      preview.firstChild.textContent = toTime(target.start);
+      preview.firstChild.textContent = toTime(target.start % (24 * 60));
       target.col.appendChild(preview);
     }
 
@@ -2493,13 +2674,18 @@
 
     // Let go on the grid: place it, or move it
     function dropBlock(d) {
-      const start = toTime(d.target.start);
-      const day = d.target.day;
+      // After midnight (bottom of the column) = the next real day
+      let real = parseKey(d.target.date);
+      let minutes = d.target.start;
+      if (minutes >= 24 * 60) { real = addDays(real, 1); minutes -= 24 * 60; }
+      const start = toTime(minutes);
+      const day = real.getDay();
+      const week = dateKey(weekStartOf(real));
 
       if (d.from === 'shelf' && d.block.kind === 'perm') {
         routine.perm.push({ id: newId(), blockId: d.block.id, day: day, start: start, skips: [] });
       } else if (d.from === 'shelf') {
-        const placed = { id: newId(), blockId: d.block.id, week: viewWeekKey(), day: day, start: start };
+        const placed = { id: newId(), blockId: d.block.id, week: week, day: day, start: start };
         routine.temp.push(placed);
         saveRoutine();
         drawCalendar();
@@ -2508,6 +2694,7 @@
       } else {
         d.place.day = day;                   // moving a permanent block moves it in every week
         d.place.start = start;
+        if (d.kind === 'temp') d.place.week = week;
         if (d.kind === 'temp') {
           saveRoutine();
           drawCalendar();
@@ -2545,7 +2732,7 @@
       const b = e.block;
       const p = e.place;
       const time = p.start + '–' + endOf(p.start, b.dur);
-      const week = viewWeekKey();
+      const week = e.week || viewWeekKey();    // the week this copy of the block is really in
       const edit = { icon: 'ti-pencil', label: 'Edit block', run: function () { openBlockSheet(b); } };
 
       if (e.kind === 'temp') {
@@ -2773,14 +2960,19 @@
         const end = field('b-end').value;
         if (!start || !end) return error('Add a start and an end time, or use Duration instead.');
         dur = toMinutes(end) - toMinutes(start);
-        if (dur <= 0) return error('The end has to be after the start.');
+        if (dur < 0) dur += 24 * 60;                        // it goes past midnight
+        if (dur === 0) return error('The end has to be after the start.');
       } else {
         dur = Number(field('b-dur').value);
       }
       if (perm) {
         if (blockDays.length && !start) return error('Pick a start time for the days you chose.');
         if (start && !blockDays.length) return error('Pick at least one day, or clear the start time.');
-        if (start && toMinutes(start) + dur > 24 * 60) return error('That goes past midnight. Pick an earlier start or a shorter duration.');
+        if (start) {
+          // The routine day ends at 03:00, so a block can't go past it
+          const s0 = toMinutes(start) < DAY_START * 60 ? toMinutes(start) + 24 * 60 : toMinutes(start);
+          if (s0 + dur > DAY_END * 60) return error('That goes past 03:00, where the routine day ends.');
+        }
       }
 
       let block = editingBlock;
@@ -2898,13 +3090,14 @@
     field('wk-today').onclick = function () { viewWeek = weekStartOf(new Date()); drawCalendar(); };
 
     function setCalView(view) {
-      field('cal-routine').classList.toggle('on', view === 'routine');
-      field('cal-month').classList.toggle('on', view === 'month');
-      field('routine-view').classList.toggle('hidden', view !== 'routine');
-      field('month-view').classList.toggle('hidden', view !== 'month');
+      ['routine', 'month', 'upcoming'].forEach(function (v) {
+        field('cal-' + v).classList.toggle('on', view === v);
+        field(v + '-view').classList.toggle('hidden', view !== v);
+      });
     }
     field('cal-routine').onclick = function () { setCalView('routine'); };
     field('cal-month').onclick = function () { setCalView('month'); };
+    field('cal-upcoming').onclick = function () { setCalView('upcoming'); };
 
     // The little message at the bottom
     let toastTimer = null;
@@ -2954,7 +3147,7 @@
         cell.appendChild(num);
 
         // Events: up to 2 names, then "+1 more"
-        const dayItems = items.filter(function (i) { return i.date === key && !i.dropped; });
+        const dayItems = items.filter(function (i) { return onDay(i, key) && !i.dropped; });
         const events = dayItems.filter(function (i) { return i.type === 'event'; })
           .sort(function (a, b) { return (a.start || '') < (b.start || '') ? -1 : 1; });
         events.slice(0, 2).forEach(function (ev) {
@@ -3048,8 +3241,16 @@
       else when = shortDate(fromKey(i.date));
       return i.start ? when + ' ' + i.start : when;
     }
+    // The next time each event happens (a repeating event shows up once, on its next day)
     function upcomingEvents() {
-      return items.filter(function (i) { return i.type === 'event' && i.date >= todayKey() && !eventHappened(i); })
+      const list = [];
+      items.forEach(function (i) {
+        if (i.type !== 'event') return;
+        let next = nextOccurrence(i, todayKey());
+        if (next === todayKey() && eventHappened(onDate(i, next))) next = nextOccurrence(i, daysFromToday(1));
+        if (next) list.push(onDate(i, next));
+      });
+      return list
         .sort(function (a, b) { return (a.date + (a.start || '')) < (b.date + (b.start || '')) ? -1 : 1; });
     }
     function upcomingReminders() {
@@ -3100,7 +3301,7 @@
             day.className = 'wd' + (key === todayKey() ? ' today' : '');
             day.innerHTML = '<b></b>';
             day.firstChild.textContent = DAY_LETTERS[d];
-            const dayEvents = items.filter(function (i) { return i.type === 'event' && i.date === key; })
+            const dayEvents = items.filter(function (i) { return i.type === 'event' && occursOn(i, key); })
               .sort(function (a, b) { return (a.start || '') < (b.start || '') ? -1 : 1; });
             dayEvents.slice(0, 3).forEach(function (ev) {
                 const tag = document.createElement('span');
@@ -3140,7 +3341,7 @@
             const cell = document.createElement('span');
             let cls = date.getMonth() !== now.getMonth() ? 'o' : '';
             if (key === todayKey()) cls += ' t';
-            if (items.some(function (i) { return i.type === 'event' && i.date === key; })) cls += ' ev';
+            if (items.some(function (i) { return i.type === 'event' && occursOn(i, key); })) cls += ' ev';
             cell.className = cls;
             cell.textContent = date.getDate();
             month.appendChild(cell);
@@ -3169,7 +3370,7 @@
           list.forEach(function (i) { widgetRow(box, i, false); });
         },
         large: function (box) {            // even more, with their details
-          const list = upcomingReminders().slice(0, 6);
+          const list = upcomingReminders().slice(0, 5);
           if (!list.length) return widgetEmpty(box, 'No reminders. Nice!');
           list.forEach(function (i) { widgetRow(box, i, true); });
         }
@@ -3262,6 +3463,183 @@
     field('widget-btn').onclick = function () { drawWidgetChooser(); field('widget-sheet').classList.remove('hidden'); };
     field('w-done').onclick = function () { field('widget-sheet').classList.add('hidden'); };
     field('widget-sheet').onclick = function (e) { if (e.target === field('widget-sheet')) field('widget-sheet').classList.add('hidden'); };
+
+    // STEP 13b: THE UPCOMING VIEW (Calendar → Upcoming)
+    // Every event coming up, in date order, grouped by month. Each month can be folded.
+    // A repeating event shows only once, on its next date, so the list doesn't fill up.
+    function drawUpcoming() {
+      const box = field('upcoming-list');
+      box.innerHTML = '';
+      const list = upcomingEvents().sort(function (a, b) {
+        return (a.date + (a.start || '')) < (b.date + (b.start || '')) ? -1 : 1;
+      });
+
+      // Months that have events, like "2026-10"
+      const months = [];
+      list.forEach(function (i) { const m = i.date.slice(0, 7); if (months.indexOf(m) === -1) months.push(m); });
+
+      // Fold all / Unfold all (the first month starts open, the rest start folded)
+      const isFolded = function (m, n) { const k = 'upcoming ' + m; return k in folded ? folded[k] : n > 0; };
+      const allFolded = months.length > 0 && months.every(isFolded);
+      field('up-fold-all').innerHTML = allFolded ? '<i class="ti ti-arrows-vertical"></i>Unfold all' : '<i class="ti ti-fold"></i>Fold all';
+      field('up-fold-all').classList.toggle('hidden', !months.length);
+      field('up-fold-all').onclick = function () {
+        months.forEach(function (m) { folded['upcoming ' + m] = !allFolded; });
+        drawUpcoming();
+      };
+
+      if (!months.length) {
+        box.innerHTML = '<div class="empty">No events coming up. Tap "+ Add event" below.</div>';
+        return;
+      }
+
+      months.forEach(function (m, n) {
+        const inMonth = list.filter(function (i) { return i.date.slice(0, 7) === m; });
+        const title = parseKey(m + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase();
+        const folded_ = isFolded(m, n);
+        box.appendChild(foldHeading(title, inMonth.length + ' EVENT' + (inMonth.length === 1 ? '' : 'S'), folded_, 'var(--yellow)', function () {
+          folded['upcoming ' + m] = !folded_;
+          drawUpcoming();
+        }));
+        if (folded_) return;
+        inMonth.forEach(function (i) { box.appendChild(upcomingRow(i)); });
+      });
+    }
+
+    // One event in the Upcoming list: [day] [name, time, category, repeat] [icon]
+    function upcomingRow(i) {
+      const row = document.createElement('div');
+      row.className = 'item upcoming event';
+
+      const day = document.createElement('div');
+      day.className = 'update';
+      const d = parseKey(i.date);
+      day.innerHTML = '<b></b><span></span>';
+      day.children[0].textContent = d.getDate();
+      day.children[1].textContent = d.toLocaleDateString('en-US', { weekday: 'short' });
+
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = i.name;
+      const cat = catById(i.cat);
+      if (cat) {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.textContent = cat.name.toUpperCase();
+        chip.style.color = cat.color;
+        chip.style.background = tint(cat.color, 0.18);
+        name.insertBefore(chip, name.firstChild);
+      }
+      const when = document.createElement('span');
+      when.className = 'upwhen';
+      let text = i.date === todayKey() ? 'Today' : i.date === daysFromToday(1) ? 'Tomorrow' : '';
+      if (i.start) text += (text ? ' · ' : '') + i.start + (i.end ? '–' + i.end : '');
+      if (i.repeat) text += (text ? ' · ' : '') + REPEAT_NAMES[i.repeat];
+      when.textContent = text;
+      if (text) name.appendChild(when);
+
+      const slot = document.createElement('div');
+      slot.className = 'slot';
+      slot.innerHTML = i.repeat ? '<i class="ti ti-repeat" style="color: var(--yellow)"></i>' : '<i class="ti ti-calendar-event"></i>';
+
+      // Tap to see its details (and edit it from there)
+      day.onclick = name.onclick = function () { openDetail(i.original || i); };
+      day.style.cursor = name.style.cursor = 'pointer';
+
+      row.append(day, name, slot);
+      return row;
+    }
+    field('up-add').onclick = function () { openSheet(null, 'event'); };
+
+    // STEP 15: BACKUP AND RESTORE (on the More page)
+    // Backup: puts everything (tasks, reminders, events, routine, categories, widgets) into one file.
+    //   On iPhone it opens the Share menu: choose "Save to Files" (iCloud Drive is a good spot).
+    //   On a computer it downloads the file.
+    // Restore: pick a backup file, confirm, and it replaces everything on this device.
+    // To move between devices: Backup on one, Restore on the other.
+    const DATA_KEYS = ['brainfog-tasks', 'brainfog-routine', 'brainfog-widgets'];
+
+    function drawMore() {
+      let last = null;
+      try { last = JSON.parse(localStorage.getItem('brainfog-last-backup')); } catch (e) { }
+      field('backup-last').textContent = last
+        ? 'Last backup from this device: ' + new Date(last).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+        : 'No backup made from this device yet.';
+    }
+
+    field('backup-btn').onclick = function () {
+      const data = {};
+      DATA_KEYS.forEach(function (key) {
+        try {
+          const saved = localStorage.getItem(key);
+          if (saved !== null) data[key] = JSON.parse(saved);
+        } catch (e) { }
+      });
+      const backup = { app: 'BrainFog', version: 1, savedAt: new Date().toISOString(), data: data };
+      const name = 'brainfog-backup-' + todayKey() + '.json';
+      const file = new File([JSON.stringify(backup, null, 1)], name, { type: 'application/json' });
+
+      const onPhone = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (onPhone && navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: 'BrainFog backup' }).catch(function () { });   // the Share menu
+      } else {
+        const url = URL.createObjectURL(file);                                              // a download
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = name;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+      }
+      save('brainfog-last-backup', backup.savedAt);
+      drawMore();
+    };
+
+    field('restore-btn').onclick = function () {
+      field('restore-file').value = '';
+      field('restore-file').click();                 // opens the file picker
+    };
+
+    field('restore-file').onchange = function () {
+      const file = field('restore-file').files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function () {
+        let backup = null;
+        try { backup = JSON.parse(reader.result); } catch (e) { }
+        if (!backup || backup.app !== 'BrainFog' || !backup.data) {
+          toast('That file isn\'t a BrainFog backup.');
+          return;
+        }
+        const when = new Date(backup.savedAt).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        confirmPanel('RESTORE?', 'This backup is from ' + when + '. Restoring replaces everything on this device with it.', 'Replace with backup', function () {
+          DATA_KEYS.forEach(function (key) {
+            try {
+              if (key in backup.data) localStorage.setItem(key, JSON.stringify(backup.data[key]));
+              else localStorage.removeItem(key);
+            } catch (e) { }
+          });
+          location.reload();                         // start again with the restored data
+        });
+      };
+      reader.readAsText(file);
+    };
+
+    // A simple "are you sure?" panel
+    function confirmPanel(title, info, yesLabel, onYes) {
+      field('act-title').textContent = title;
+      field('act-info').textContent = info;
+      const box = field('act-choices');
+      box.innerHTML = '';
+      const yes = document.createElement('button');
+      yes.type = 'button';
+      yes.innerHTML = '<i class="ti ti-check" style="color: var(--yellow)"></i><span></span>';
+      yes.querySelector('span').textContent = yesLabel;
+      yes.onclick = function () { field('act-sheet').classList.add('hidden'); onYes(); };
+      box.appendChild(yes);
+      field('act-sheet').classList.remove('hidden');
+    }
 
     // STEP 11: Start everything
     let shownDay = '';
