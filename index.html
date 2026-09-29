@@ -105,7 +105,7 @@
       font-size: 14px;
       margin: 0 0 14px;
     }
-    .score { font-size: 10px; color: var(--pink); text-shadow: 0 0 8px var(--pink); }
+    .score { font-size: 8px; color: var(--pink); text-shadow: 0 0 6px var(--pink); }
 
     /* ---- The lists ---- */
     .list {
@@ -140,7 +140,8 @@
 
     .name { font-size: 16px; transition: color 0.2s; }
     .item.task .name, .item.task .time,
-    .item.reminder .name, .item.reminder .time { cursor: pointer; }
+    .item.reminder .name, .item.reminder .time,
+    .item.event .name, .item.event .time { cursor: pointer; }
     .dur  { display: inline-block; font-size: 11px; color: var(--purple); margin-left: 6px; vertical-align: middle; }
 
     /* The right column: same size box for checks AND icons, so they line up */
@@ -200,7 +201,54 @@
       font-size: 15px;
       cursor: pointer;
     }
-    .add.green { border-color: var(--green); color: var(--green); }
+    .add.green  { border-color: var(--green); color: var(--green); }
+    .add.yellow { border-color: var(--yellow); color: var(--yellow); }
+
+    /* "+ Add" and "Suggestions" side by side */
+    .home-actions { display: grid; grid-template-columns: 3fr 2fr; gap: 10px; }
+
+    /* Page title with a small button on the right (like "Record") */
+    .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .small-btn {
+      display: flex; align-items: center; gap: 6px;
+      font: inherit; font-size: 13px;
+      padding: 6px 10px; border-radius: 10px;
+      background: none; color: var(--purple);
+      border: 2px solid rgba(181, 156, 255, 0.5);
+      cursor: pointer;
+    }
+    .small-btn i { font-size: 16px; }
+
+    /* ---- The Record page ---- */
+    .record-head { display: flex; justify-content: space-between; align-items: center; }
+    .record-head .score { color: var(--purple); text-shadow: none; }
+    .item.record { grid-template-columns: 42px 1fr 24px; }
+    .item.record .name { cursor: default; }
+    .item.record.done .name { text-decoration: none; color: var(--text); }
+    .status-done   { color: var(--pink);  text-shadow: 0 0 8px var(--pink); }
+    .status-missed { color: var(--red); }
+    .status-wait   { color: var(--yellow); }
+    .type-tag { display: inline-block; font-size: 11px; margin-left: 6px; vertical-align: middle; }
+    .type-tag.task     { color: var(--pink); }
+    .type-tag.reminder { color: var(--green); }
+    .back-btn { margin: 4px 0 10px; }
+
+    /* ---- The Suggestions panel ---- */
+    .sugg-cat { display: flex; align-items: center; gap: 8px; font-size: 10px; margin: 8px 0 0; }
+    .sugg-cat i { font-size: 16px; }
+    .sugg-list { border-radius: 12px; background: var(--field); padding: 2px 12px; }
+    .sugg-row { display: grid; grid-template-columns: 1fr 40px; align-items: center; gap: 10px; padding: 10px 0; }
+    .sugg-row + .sugg-row { border-top: 1px solid rgba(41, 231, 255, 0.15); }
+    .sugg-row .info { display: block; font-size: 12px; color: var(--dim); margin-top: 2px; }
+    .sugg-add {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: none; border: 2px solid var(--pink); color: var(--pink);
+      font-size: 20px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sugg-add.added { border-color: var(--green); color: var(--green); box-shadow: 0 0 8px var(--green); cursor: default; }
+    .sugg-empty { color: var(--dim); font-size: 13px; padding: 10px 0; }
+    .sugg-locked { display: flex; align-items: center; gap: 8px; color: var(--dim); font-size: 13px; padding: 10px 0; }
 
     /* Widgets: a grid of 2 columns; "wide" ones take both columns */
     .widgets {
@@ -271,23 +319,46 @@
     .panel input[type="time"]::-webkit-calendar-picker-indicator,
     .panel input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
 
-    /* The "Reminder" check in the add panel */
-    .kind-check {
+    /* The Task / Reminder / Event checks in the add panel (only one can be on) */
+    .kinds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .kind {
+      --c: var(--pink);
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 10px 12px;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 6px;
       border-radius: 10px;
       background: var(--field);
-      border: 2px solid rgba(93, 255, 155, 0.4);
-      color: var(--text);
+      border: 2px solid rgba(143, 138, 184, 0.35);
+      color: var(--dim);
       font: inherit;
-      font-size: 15px;
-      text-align: left;
+      font-size: 14px;
       cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
     }
-    .kind-check .check { border-color: var(--green); }
-    .kind-check.on .check { background: var(--green); border-color: var(--green); box-shadow: 0 0 8px var(--green); }
+    .kind[data-kind="reminder"] { --c: var(--green); }
+    .kind[data-kind="event"]    { --c: var(--yellow); }
+    .kind .check { width: 16px; height: 16px; border-color: var(--c); }
+    .kind.on { border-color: var(--c); color: var(--text); }
+    .kind.on .check { background: var(--c); box-shadow: 0 0 8px var(--c); }
+
+    /* Importance: none, ★, ★★ or ★★★ */
+    .imp-label { font-size: 13px; color: var(--cyan); margin: 0 0 6px; }
+    .imps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .imp {
+      font: inherit; font-size: 14px; padding: 9px 4px; border-radius: 10px;
+      background: var(--field); color: var(--dim);
+      border: 2px solid rgba(143, 138, 184, 0.35); cursor: pointer;
+    }
+    .imp.on { color: var(--text); border-color: var(--yellow); box-shadow: 0 0 8px rgba(255, 225, 77, 0.5); }
+    .imp[data-imp="3"].on { border-color: var(--pink); box-shadow: 0 0 8px var(--pink); }
+
+    /* The little stars next to a name in the lists */
+    .stars { display: inline-block; font-size: 11px; margin-left: 6px; vertical-align: middle; letter-spacing: 1px; }
+    .stars.s1 { color: var(--cyan); }
+    .stars.s2 { color: var(--yellow); }
+    .stars.s3 { color: var(--pink); text-shadow: 0 0 6px var(--pink); }
 
     /* An input with a little "×" button next to it, to empty it */
     .with-clear { display: flex; gap: 8px; }
@@ -331,7 +402,19 @@
       border: 2px solid rgba(41, 231, 255, 0.4); cursor: pointer;
     }
     .choices button i { font-size: 20px; }
-    .choices .c-today i { color: var(--pink); }
+    .choices .c-done  i { color: var(--pink); }
+    .choices .c-today i { color: var(--cyan); }
+
+    /* The "Fit it in" box, for things with a duration but no start time */
+    .fit { border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .fit .pixel { font-size: 10px; color: var(--cyan); margin: 0; }
+    .fit p { margin: 0; font-size: 14px; }
+    .fit-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+    .fit-buttons button {
+      font: inherit; font-size: 14px; padding: 9px 12px; border-radius: 10px;
+      background: none; color: var(--cyan); border: 2px solid var(--cyan); cursor: pointer;
+    }
+    .fit-buttons .pass { color: var(--yellow); border-color: var(--yellow); }
     .choices .c-later i { color: var(--yellow); }
     .choices .c-drop  i { color: var(--dim); }
     .later-row { display: flex; gap: 8px; }
@@ -358,7 +441,10 @@
 
     <!-- PAGE: HOME -->
     <section id="page-home">
-      <h1 class="page-title pixel">DAY 1-UP</h1>
+      <div class="title-row">
+        <h1 class="page-title pixel">DAY 1-UP</h1>
+        <button class="small-btn" id="record-btn"><i class="ti ti-history"></i>Record</button>
+      </div>
       <p class="date">
         <span id="today"></span>
         <span id="score" class="score pixel"></span>
@@ -366,7 +452,10 @@
 
       <!-- The day list. It starts EMPTY here: the script fills it in. -->
       <div class="list glow-cyan" id="day-list"></div>
-      <button class="add" id="add-btn"><i class="ti ti-plus"></i> Add to today</button>
+      <div class="home-actions">
+        <button class="add" id="add-btn"><i class="ti ti-plus"></i> Add</button>
+        <button class="add yellow" id="sugg-btn"><i class="ti ti-bulb"></i> Suggestions</button>
+      </div>
 
       <!-- Widgets (examples: each will come from its own page later) -->
       <div class="widgets">
@@ -412,6 +501,14 @@
       <button class="add green" id="add-reminder-btn"><i class="ti ti-plus"></i> Add reminder</button>
     </section>
 
+    <!-- PAGE: RECORD (past tasks and reminders: done or not done) -->
+    <section id="page-record" class="hidden">
+      <button class="small-btn back-btn" id="record-back"><i class="ti ti-arrow-left"></i>Home</button>
+      <h1 class="page-title pixel" style="color: var(--purple); text-shadow: 0 0 10px var(--purple)">RECORD</h1>
+      <p class="date"><span>Past tasks and reminders</span><span id="record-total" class="score pixel" style="color: var(--purple); text-shadow: none"></span></p>
+      <div id="record-list"></div>
+    </section>
+
     <!-- PAGE: LOCKED (for every area we haven't built yet) -->
     <section id="page-locked" class="hidden">
       <div class="locked glow-yellow">
@@ -441,46 +538,69 @@
         <input id="f-name" type="text" placeholder="Unreal homework" autocomplete="off">
       </label>
 
-      <!-- The "Reminder" check: on = reminder, off = task -->
-      <button type="button" class="kind-check" id="f-reminder">
-        <span class="check"></span>
-        <span>Reminder</span>
-      </button>
-
-      <!-- Fields for a TASK: start, then end time or duration -->
-      <div class="fields" id="task-fields">
-        <label>Start
-          <input id="f-start" type="time">
-        </label>
-
-        <div class="switch">
-          <button type="button" id="mode-end" class="on">End time</button>
-          <button type="button" id="mode-dur">Duration</button>
-        </div>
-
-        <label id="wrap-end">End
-          <input id="f-end" type="time">
-        </label>
-        <label id="wrap-dur" class="hidden">Duration
-          <select id="f-dur"></select>
-        </label>
+      <!-- What kind of thing is it? Only one can be checked. -->
+      <div class="kinds">
+        <button type="button" class="kind" data-kind="task"><span class="check"></span>Task</button>
+        <button type="button" class="kind" data-kind="reminder"><span class="check"></span>Reminder</button>
+        <button type="button" class="kind" data-kind="event"><span class="check"></span>Event</button>
       </div>
 
-      <!-- Fields for a REMINDER: date and time, both optional -->
-      <div class="fields hidden" id="reminder-fields">
+      <!-- IMPORTANCE (tasks and reminders). ★ = just take note, ★★★ = most important -->
+      <div id="imp-fields">
+        <p class="imp-label">Importance</p>
+        <div class="imps">
+          <button type="button" class="imp" data-imp="0">None</button>
+          <button type="button" class="imp" data-imp="1">★</button>
+          <button type="button" class="imp" data-imp="2">★★</button>
+          <button type="button" class="imp" data-imp="3">★★★</button>
+        </div>
+      </div>
+
+      <!-- DATE (reminders and events). Empty = today. -->
+      <div class="fields" id="date-fields">
         <label><span>Date <small>(optional)</small></span>
           <span class="with-clear">
             <input id="f-date" type="date">
             <button type="button" class="clear-btn" data-clear="f-date" aria-label="Clear date">×</button>
           </span>
         </label>
-        <label><span>Time <small>(optional)</small></span>
+        <p class="hint">No date: today.</p>
+      </div>
+
+      <!-- START, then END or DURATION. All optional, for every kind. -->
+      <div class="fields">
+        <label><span>Start <small>(optional)</small></span>
           <span class="with-clear">
-            <input id="f-time" type="time">
-            <button type="button" class="clear-btn" data-clear="f-time" aria-label="Clear time">×</button>
+            <input id="f-start" type="time">
+            <button type="button" class="clear-btn" data-clear="f-start" aria-label="Clear start">×</button>
           </span>
         </label>
-        <p class="hint">No date: today. No time: at the top of the list.</p>
+        <p class="hint">No start: at the top of the list.</p>
+
+        <div class="switch">
+          <button type="button" id="mode-end" class="on">End time</button>
+          <button type="button" id="mode-dur">Duration</button>
+        </div>
+
+        <label id="wrap-end"><span>End <small>(optional)</small></span>
+          <span class="with-clear">
+            <input id="f-end" type="time">
+            <button type="button" class="clear-btn" data-clear="f-end" aria-label="Clear end">×</button>
+          </span>
+        </label>
+        <label id="wrap-dur" class="hidden"><span>Duration <small>(optional)</small></span>
+          <select id="f-dur"></select>
+        </label>
+      </div>
+
+      <!-- FIT IT IN: only shows when editing something for today with a duration but no start -->
+      <div class="fit glow-cyan hidden" id="fit-box">
+        <p class="pixel">FIT IT IN</p>
+        <p id="fit-text"></p>
+        <div class="fit-buttons">
+          <button type="button" id="fit-place"></button>
+          <button type="button" class="pass" id="fit-pass"><i class="ti ti-arrow-right"></i> Pass to tomorrow</button>
+        </div>
       </div>
 
       <p class="error" id="f-error"></p>
@@ -493,6 +613,16 @@
     </form>
   </div>
 
+  <!-- POP-UP PANEL: Suggestions, grouped by category (hidden until needed) -->
+  <div class="sheet hidden" id="sugg-sheet">
+    <div class="panel glow-yellow">
+      <h2 class="pixel" style="color: var(--yellow); text-shadow: 0 0 8px var(--yellow)">SUGGESTIONS</h2>
+      <p class="hint" style="margin: 0">Tap + to add it to today.</p>
+      <div id="sugg-content"></div>
+      <div class="buttons"><button type="button" id="sugg-close">Close</button></div>
+    </div>
+  </div>
+
   <!-- POP-UP PANEL for unfinished things from past days (hidden until needed) -->
   <div class="sheet hidden" id="leftover-sheet">
     <div class="panel glow-yellow">
@@ -500,10 +630,12 @@
       <h2 class="pixel" style="color: var(--yellow); text-shadow: 0 0 8px var(--yellow)">LEFTOVER QUEST</h2>
       <p class="quest" id="lo-name"></p>
       <p class="quest-info" id="lo-info"></p>
+      <p class="quest-info" style="color: var(--text)">This wasn't checked off. What happened?</p>
 
       <div class="choices">
-        <button type="button" class="c-today" id="lo-today"><i class="ti ti-arrow-right"></i>Move to today</button>
-        <button type="button" class="c-later" id="lo-later"><i class="ti ti-calendar-plus"></i>Move to another day</button>
+        <button type="button" class="c-done" id="lo-done"><i class="ti ti-check"></i>I did it</button>
+        <button type="button" class="c-today" id="lo-today"><i class="ti ti-arrow-right"></i>Pass to today</button>
+        <button type="button" class="c-later" id="lo-later"><i class="ti ti-calendar-plus"></i>Pass to another day</button>
         <div class="hidden" id="lo-later-row">
           <div class="later-row buttons">
             <input type="date" id="lo-date">
@@ -511,7 +643,7 @@
           </div>
           <p class="error" id="lo-error"></p>
         </div>
-        <button type="button" class="c-drop" id="lo-drop"><i class="ti ti-x"></i>Mark as not done</button>
+        <button type="button" class="c-drop" id="lo-drop"><i class="ti ti-x"></i>Dismiss (not completed)</button>
       </div>
     </div>
   </div>
@@ -550,9 +682,40 @@
     }
     function sortByTime(a, b) { return toMinutes(a.data.start) - toMinutes(b.data.start); }
 
+    // How long something lasts, in minutes: from start to end, or its own duration if it has no start
+    function lengthOf(i) {
+      if (i.start && i.end) return toMinutes(i.end) - toMinutes(i.start);
+      return i.dur || 0;
+    }
+    // MOST PRESSING FIRST: higher importance first; if equal, the closest date first;
+    // things with no date go last. (Chores and projects will use this too.)
+    function byPressing(a, b) {
+      const importance = (b.imp || 0) - (a.imp || 0);
+      if (importance) return importance;
+      if (!a.date) return 1;
+      if (!b.date) return -1;
+      return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
+    }
+    // Importance as little stars: 2 → "★★"
+    function starsFor(i) {
+      if (!i.imp) return null;
+      const s = document.createElement('span');
+      s.className = 'stars s' + i.imp;
+      s.textContent = '★'.repeat(i.imp);
+      return s;
+    }
+
+    // A short description like "Monday, Sep 28 · 18:00–19:30" or "Monday, Sep 28 · 45m"
+    function whenText(i) {
+      let text = niceDate(i.date);
+      if (i.start) text += ' · ' + i.start + (i.end ? '–' + i.end : '');
+      else if (i.dur) text += ' · ' + durationText(i.dur);
+      return text;
+    }
+
     // STEP 2: The app's memory, saved on this device.
-    // ONE list holds both tasks and reminders. Each one has a "type": 'task' or 'reminder'.
-    // Home and the Reminders page both read this same list, so they always match.
+    // ONE list holds tasks, reminders and events. Each one has a "type": 'task', 'reminder' or 'event'.
+    // Home, Reminders, Record and Suggestions all read this same list, so they always match.
     function load(name) {
       try { return JSON.parse(localStorage.getItem(name)) || []; }
       catch (e) { return []; }
@@ -565,10 +728,8 @@
     items.forEach(function (i) { if (!i.type) i.type = 'task'; });   // older tasks didn't have a type yet
     function saveItems() { save('brainfog-tasks', items); }
 
-    // STEP 3: TEMPORARY examples, just to see the layout.
-    // Level 4 replaces the routine, and Level 5 the events.
+    // STEP 3: TEMPORARY example, just to see the layout. Level 4 replaces it with your real routine.
     const demoRoutine = [ { name: 'Work', start: '07:30', end: '15:00' } ];
-    const demoEvents  = [ { name: 'Dentist', start: '17:00', end: '17:45' } ];
 
     // STEP 4: Draw one row of a list
     function makeRow(item) {
@@ -586,14 +747,16 @@
         time.textContent = '—';
       }
 
-      // Middle column: the name, with the duration in small purple letters
+      // Middle column: the name, its importance stars, and the duration in small purple letters
       const name = document.createElement('div');
       name.className = 'name';
       name.textContent = item.data.name;
-      if (item.data.start && item.data.end) {
+      const stars = starsFor(item.data);
+      if (stars) name.appendChild(stars);
+      if (lengthOf(item.data)) {
         const dur = document.createElement('span');
         dur.className = 'dur';
-        dur.textContent = durationText(toMinutes(item.data.end) - toMinutes(item.data.start));
+        dur.textContent = durationText(lengthOf(item.data));
         name.appendChild(dur);
       }
 
@@ -604,6 +767,7 @@
         slot.innerHTML = '<i class="ti ti-repeat"></i>';
       } else if (item.kind === 'event') {
         slot.innerHTML = '<i class="ti ti-calendar-event"></i>';
+        time.onclick = name.onclick = function () { openSheet(item.data); };   // tap to edit
       } else {
         slot.innerHTML = '<div class="check"></div>';
         slot.onclick = function () {
@@ -628,7 +792,6 @@
       const timed = [];
       if (key === todayKey()) {
         demoRoutine.forEach(function (r) { timed.push({ kind: 'routine', data: r }); });
-        demoEvents.forEach(function (e) { timed.push({ kind: 'event', data: e }); });
       }
       items.forEach(function (i) {
         if (i.date !== key || i.dropped) return;
@@ -636,6 +799,7 @@
         if (i.start) timed.push(entry); else untimed.push(entry);
       });
       timed.sort(sortByTime);
+      untimed.sort(function (a, b) { return byPressing(a.data, b.data); });   // most important on top
       return { untimed: untimed, timed: timed };
     }
 
@@ -657,7 +821,7 @@
       const day = itemsForDay(todayKey());
       fillList(box, day);
       if (!day.untimed.length && !day.timed.length) {
-        box.innerHTML = '<div class="empty">Nothing yet. Tap "Add to today" below.</div>';
+        box.innerHTML = '<div class="empty">Nothing yet. Tap "+ Add" below.</div>';
       }
       updateScore();
     }
@@ -718,47 +882,150 @@
     };
     let currentPage = 'home';
 
+    const builtPages = ['home', 'reminders', 'record'];   // pages that exist; the rest show "Locked"
+
     function showPage(page) {
       currentPage = page;
       document.querySelectorAll('.tab').forEach(function (tab) {
-        tab.classList.toggle('active', tab.dataset.page === page);
+        // The Record page belongs to Home, so Home stays lit up there
+        tab.classList.toggle('active', tab.dataset.page === page || (page === 'record' && tab.dataset.page === 'home'));
       });
-      document.getElementById('page-home').classList.toggle('hidden', page !== 'home');
-      document.getElementById('page-reminders').classList.toggle('hidden', page !== 'reminders');
-      document.getElementById('page-locked').classList.toggle('hidden', page === 'home' || page === 'reminders');
+      builtPages.forEach(function (p) {
+        document.getElementById('page-' + p).classList.toggle('hidden', page !== p);
+      });
+      document.getElementById('page-locked').classList.toggle('hidden', builtPages.indexOf(page) !== -1);
 
-      if (page === 'home') drawHome();
-      else if (page === 'reminders') drawReminders();
-      else document.getElementById('locked-name').textContent = pageNames[page];
-
+      if (builtPages.indexOf(page) === -1) document.getElementById('locked-name').textContent = pageNames[page];
+      redraw();
       document.getElementById('main').scrollTop = 0;
     }
     document.querySelectorAll('.tab').forEach(function (tab) {
       tab.onclick = function () { showPage(tab.dataset.page); };
     });
+    document.getElementById('record-btn').onclick = function () { showPage('record'); };
+    document.getElementById('record-back').onclick = function () { showPage('home'); };
 
     // Redraw whatever page is showing (after adding, editing or deleting)
     function redraw() {
-      if (currentPage === 'reminders') drawReminders(); else drawHome();
+      if (currentPage === 'reminders') drawReminders();
+      else if (currentPage === 'record') drawRecord();
+      else drawHome();
     }
 
-    // STEP 9: The pop-up panel for adding and editing tasks and reminders
+    // STEP 8b: The RECORD page: newest day first, with completed / not completed for each thing.
+    // Things you check off go in right away. Unchecked things go in once you answer the
+    // Leftover quest the next day (as completed, or as not completed if you dismiss them).
+    function drawRecord() {
+      const page = document.getElementById('record-list');
+      page.innerHTML = '';
+
+      // Everything from past days, plus anything already completed today or on a future day.
+      // (Events have no check, so they're not part of the record.)
+      const past = items.filter(function (i) {
+        return i.type !== 'event' && (i.date < todayKey() || i.done);
+      });
+      const days = [];
+      past.forEach(function (i) { if (days.indexOf(i.date) === -1) days.push(i.date); });
+      days.sort().reverse();
+
+      const allDone = past.filter(function (i) { return i.done; }).length;
+      document.getElementById('record-total').textContent = past.length ? 'TOTAL ' + allDone + '/' + past.length : '';
+
+      if (!days.length) {
+        page.innerHTML = '<div class="list glow-cyan"><div class="empty">Nothing here yet. Your past days will show up here.</div></div>';
+        return;
+      }
+
+      days.forEach(function (key) {
+        const dayItems = past.filter(function (i) { return i.date === key; });
+        // No time first, then by time
+        dayItems.sort(function (a, b) {
+          if (!a.start) return -1;
+          if (!b.start) return 1;
+          return toMinutes(a.start) - toMinutes(b.start);
+        });
+        const doneCount = dayItems.filter(function (i) { return i.done; }).length;
+
+        const head = document.createElement('div');
+        head.className = 'record-head';
+        head.innerHTML = '<h2 class="day-heading pixel" style="color: var(--purple); text-shadow: none"></h2><span class="score pixel"></span>';
+        // Today and future days only show what's done so far; past days show the full score
+        if (key === todayKey())     head.children[0].textContent = 'TODAY (SO FAR)';
+        else if (key > todayKey())  head.children[0].textContent = niceDate(key).toUpperCase() + ' (EARLY)';
+        else                        head.children[0].textContent = niceDate(key).toUpperCase();
+        head.children[1].textContent = key >= todayKey() ? doneCount + ' DONE' : 'CLEAR ' + doneCount + '/' + dayItems.length;
+        page.appendChild(head);
+
+        const box = document.createElement('div');
+        box.className = 'list glow-cyan';
+        dayItems.forEach(function (i) {
+          const row = document.createElement('div');
+          row.className = 'item record ' + i.type + (i.done ? ' done' : '');
+
+          const time = document.createElement('div');
+          time.className = 'time';
+          time.innerHTML = '<span></span><span class="end"></span>';
+          time.children[0].textContent = i.start || '—';
+          time.children[1].textContent = i.end || '';
+
+          const name = document.createElement('div');
+          name.className = 'name';
+          name.textContent = i.name;
+          const stars = starsFor(i);
+          if (stars) name.appendChild(stars);
+          if (lengthOf(i)) {
+            const dur = document.createElement('span');
+            dur.className = 'dur';
+            dur.textContent = durationText(lengthOf(i));
+            name.appendChild(dur);
+          }
+          const tag = document.createElement('span');
+          tag.className = 'type-tag ' + i.type;
+          tag.textContent = i.type === 'task' ? 'task' : 'reminder';
+          name.appendChild(tag);
+
+          // Done = pink check, not done = red X, still waiting for an answer = yellow hourglass
+          const slot = document.createElement('div');
+          slot.className = 'slot';
+          if (i.done) slot.innerHTML = '<i class="ti ti-circle-check status-done"></i>';
+          else if (i.dropped) slot.innerHTML = '<i class="ti ti-circle-x status-missed"></i>';
+          else slot.innerHTML = '<i class="ti ti-hourglass status-wait"></i>';
+
+          row.append(time, name, slot);
+          box.appendChild(row);
+        });
+        page.appendChild(box);
+      });
+    }
+
+    // STEP 9: The pop-up panel for adding and editing tasks, reminders and events.
+    // All three kinds have the same boxes, and everything except the name is optional:
+    //   Date      → empty means today
+    //   Start     → empty means it goes at the top of the list
+    //   End time or Duration → how long it takes (a duration also works without a start)
     const sheet = document.getElementById('sheet');
     const form = document.getElementById('item-form');
     const errorText = document.getElementById('f-error');
     let editing = null;       // the item being edited, or null when adding a new one
-    let isReminder = false;   // is the "Reminder" check on?
+    let kind = 'task';        // which check is on: 'task', 'reminder' or 'event'
+    let importance = 0;       // 0 = none, 1 to 3 stars
     let mode = 'end';         // "end" = you type the end time, "dur" = you pick a duration
 
     function field(id) { return document.getElementById(id); }
 
-    // Fill the duration list: 15m, 30m, 45m ... up to 8h
-    for (let m = 15; m <= 480; m += 15) {
-      const option = document.createElement('option');
-      option.value = m;
-      option.textContent = durationText(m);
-      field('f-dur').appendChild(option);
-    }
+    // Fill the duration list: "No duration", then 15m, 30m, 45m ... up to 8h
+    (function () {
+      const none = document.createElement('option');
+      none.value = 0;
+      none.textContent = 'No duration';
+      field('f-dur').appendChild(none);
+      for (let m = 15; m <= 480; m += 15) {
+        const option = document.createElement('option');
+        option.value = m;
+        option.textContent = durationText(m);
+        field('f-dur').appendChild(option);
+      }
+    })();
 
     function setMode(newMode) {
       mode = newMode;
@@ -771,42 +1038,52 @@
     field('mode-end').onclick = function () { setMode('end'); };
     field('mode-dur').onclick = function () { setMode('dur'); };
 
-    // Turn the "Reminder" check on or off, and show the matching fields
-    function setReminder(on) {
-      isReminder = on;
-      field('f-reminder').classList.toggle('on', on);
-      field('task-fields').classList.toggle('hidden', on);
-      field('reminder-fields').classList.toggle('hidden', !on);
-      const word = on ? 'REMINDER' : 'TASK';
-      field('sheet-title').textContent = (editing ? 'EDIT ' : 'NEW ') + word;
+    // Check one kind (the others turn off)
+    function setKind(newKind) {
+      kind = newKind;
+      document.querySelectorAll('.kind').forEach(function (btn) {
+        btn.classList.toggle('on', btn.dataset.kind === kind);
+      });
+      field('sheet-title').textContent = (editing ? 'EDIT ' : 'NEW ') + kind.toUpperCase();
+      field('imp-fields').classList.toggle('hidden', kind === 'event');   // events don't need importance
       errorText.textContent = '';
     }
-    field('f-reminder').onclick = function () { setReminder(!isReminder); };
+    document.querySelectorAll('.kind').forEach(function (btn) {
+      btn.onclick = function () { setKind(btn.dataset.kind); };
+    });
+
+    // Pick an importance level (only one can be on)
+    function setImportance(n) {
+      importance = n;
+      document.querySelectorAll('.imp').forEach(function (btn) {
+        btn.classList.toggle('on', Number(btn.dataset.imp) === n);
+      });
+    }
+    document.querySelectorAll('.imp').forEach(function (btn) {
+      btn.onclick = function () { setImportance(Number(btn.dataset.imp)); };
+    });
 
     // The little "×" buttons empty their box
     document.querySelectorAll('.clear-btn').forEach(function (btn) {
       btn.onclick = function () { field(btn.dataset.clear).value = ''; errorText.textContent = ''; };
     });
 
-    function openSheet(item, startAsReminder) {
+    function openSheet(item, startKind) {
       editing = item || null;
-      setMode('end');
       field('btn-delete').classList.toggle('hidden', !editing);
 
-      // Suggest a start time for new tasks: the next quarter hour from now, lasting 1 hour
-      const now = new Date();
-      let start = Math.ceil((now.getHours() * 60 + now.getMinutes()) / 15) * 15;
-      if (start > 22 * 60 + 45) start = 22 * 60 + 45;
-
-      field('f-name').value = editing ? editing.name : '';
-      field('f-start').value = editing && editing.start ? editing.start : toTime(start);
-      field('f-end').value = editing && editing.end ? editing.end : toTime(Math.min(start + 60, 23 * 60 + 59));
-      field('f-dur').value = 60;
-      field('f-date').value = editing ? editing.date : '';
-      field('f-time').value = editing && editing.start ? editing.start : '';
+      field('f-name').value  = editing ? editing.name : '';
+      field('f-date').value  = editing ? editing.date : '';
+      field('f-start').value = editing && editing.start ? editing.start : '';
+      field('f-end').value   = editing && editing.end ? editing.end : '';
+      field('f-dur').value   = editing ? lengthOf(editing) : 0;
       field('f-date').min = todayKey();
 
-      setReminder(editing ? editing.type === 'reminder' : !!startAsReminder);
+      // Open on "Duration" when it has a duration but no start (there's no end time to show)
+      setMode(editing && !editing.start && editing.dur ? 'dur' : 'end');
+      setKind(editing ? editing.type : (startKind || 'task'));
+      setImportance(editing ? (editing.imp || 0) : 0);
+      showFitBox();
       sheet.classList.remove('hidden');
     }
 
@@ -815,8 +1092,8 @@
       editing = null;
     }
 
-    field('add-btn').onclick = function () { openSheet(null, false); };
-    field('add-reminder-btn').onclick = function () { openSheet(null, true); };
+    field('add-btn').onclick = function () { openSheet(null, 'task'); };
+    field('add-reminder-btn').onclick = function () { openSheet(null, 'reminder'); };
     field('btn-cancel').onclick = closeSheet;
     sheet.onclick = function (e) { if (e.target === sheet) closeSheet(); };   // tap outside to close
     form.oninput = function () { errorText.textContent = ''; };
@@ -827,40 +1104,41 @@
       const name = field('f-name').value.trim();
       if (!name) { errorText.textContent = 'Give it a name.'; return; }
 
-      let date, start, end;
-
-      if (isReminder) {
-        // No date → today. No time → it goes at the top of that day's list.
-        date = field('f-date').value || todayKey();
-        start = field('f-time').value || '';
-        end = '';
-        if (date < todayKey() && !(editing && editing.date === date)) {
-          errorText.textContent = 'Pick today or a later day.'; return;
-        }
-      } else {
-        date = editing ? editing.date : todayKey();
-        start = field('f-start').value;
-        if (!start) { errorText.textContent = 'Pick a start time.'; return; }
-        if (mode === 'end') {
-          end = field('f-end').value;
-          if (!end) { errorText.textContent = 'Pick an end time.'; return; }
-        } else {
-          const endMinutes = toMinutes(start) + Number(field('f-dur').value);
-          if (endMinutes >= 24 * 60) { errorText.textContent = 'That goes past midnight. Pick a shorter duration.'; return; }
-          end = toTime(endMinutes);
-        }
-        if (toMinutes(end) <= toMinutes(start)) { errorText.textContent = 'The end has to be after the start.'; return; }
+      const date = field('f-date').value || todayKey();    // no date → today
+      if (date < todayKey() && !(editing && editing.date === date)) {
+        errorText.textContent = 'Pick today or a later day.'; return;
       }
 
-      const type = isReminder ? 'reminder' : 'task';
-      if (editing) {
-        editing.type = type;
-        editing.name = name;
-        editing.date = date;
-        editing.start = start;
-        editing.end = end;
+      const start = field('f-start').value || '';         // no start → top of the list
+      let end = '';
+      let dur = 0;
+
+      if (mode === 'end') {
+        end = field('f-end').value || '';
+        if (end && !start) { errorText.textContent = 'Add a start time, or use Duration instead.'; return; }
+        if (end && toMinutes(end) <= toMinutes(start)) { errorText.textContent = 'The end has to be after the start.'; return; }
       } else {
-        items.push({ id: Date.now(), type: type, name: name, date: date, start: start, end: end, done: false });
+        const minutes = Number(field('f-dur').value);
+        if (minutes && start) {
+          // With a start: work out the end time
+          const endMinutes = toMinutes(start) + minutes;
+          if (endMinutes >= 24 * 60) { errorText.textContent = 'That goes past midnight. Pick a shorter duration.'; return; }
+          end = toTime(endMinutes);
+        } else {
+          // Without a start: just remember how long it takes
+          dur = minutes;
+        }
+      }
+
+      const data = { type: kind, name: name, date: date, start: start, end: end, dur: dur,
+                     imp: kind === 'event' ? 0 : importance };
+      if (editing) {
+        Object.assign(editing, data);
+        if (kind === 'event') editing.done = false;   // events have no check
+      } else {
+        data.id = Date.now();
+        data.done = false;
+        items.push(data);
       }
       saveItems();
       closeSheet();
@@ -874,6 +1152,58 @@
       redraw();
     };
 
+    // STEP 9b: FIT IT IN. For something today with a duration but no start time:
+    // find the first free gap from now on that's long enough, or pass it to tomorrow.
+    function findFreeSlot(minutes) {
+      const now = new Date();
+      let cursor = Math.ceil((now.getHours() * 60 + now.getMinutes()) / 15) * 15;   // next quarter hour
+
+      // Everything today that takes up time (it has a start and an end)
+      const busy = itemsForDay(todayKey()).timed
+        .filter(function (e) { return e.data.start && e.data.end; })
+        .map(function (e) { return [toMinutes(e.data.start), toMinutes(e.data.end)]; })
+        .sort(function (a, b) { return a[0] - b[0]; });
+
+      for (let n = 0; n < busy.length; n++) {
+        if (busy[n][0] - cursor >= minutes) break;          // the gap before this one fits
+        cursor = Math.max(cursor, busy[n][1]);              // otherwise, jump to its end
+      }
+      return cursor + minutes < 24 * 60 ? cursor : null;    // null = no room left today
+    }
+
+    let fitStart = null;
+    function showFitBox() {
+      const show = editing && editing.date === todayKey() && !editing.start && editing.dur && editing.type !== 'event';
+      field('fit-box').classList.toggle('hidden', !show);
+      if (!show) return;
+
+      fitStart = findFreeSlot(editing.dur);
+      if (fitStart === null) {
+        field('fit-text').textContent = 'There\'s no free ' + durationText(editing.dur) + ' left today.';
+        field('fit-place').classList.add('hidden');
+      } else {
+        const slot = toTime(fitStart) + '–' + toTime(fitStart + editing.dur);
+        field('fit-text').textContent = 'Your next free ' + durationText(editing.dur) + ' is ' + slot + '.';
+        field('fit-place').innerHTML = '<i class="ti ti-clock-plus"></i> Place it at ' + toTime(fitStart);
+        field('fit-place').classList.remove('hidden');
+      }
+    }
+
+    field('fit-place').onclick = function () {
+      editing.start = toTime(fitStart);
+      editing.end = toTime(fitStart + editing.dur);
+      editing.dur = 0;
+      saveItems();
+      closeSheet();
+      redraw();
+    };
+    field('fit-pass').onclick = function () {
+      editing.date = daysFromToday(1);
+      saveItems();
+      closeSheet();
+      redraw();
+    };
+
     // STEP 10: Leftover quests: unfinished tasks and reminders from past days.
     // They never disappear on their own: you choose to move them or mark them as not done.
     const leftoverSheet = field('leftover-sheet');
@@ -881,7 +1211,7 @@
     let leftoverTotal = 0;
 
     function checkLeftovers() {
-      leftovers = items.filter(function (i) { return i.date < todayKey() && !i.done && !i.dropped; });
+      leftovers = items.filter(function (i) { return i.type !== 'event' && i.date < todayKey() && !i.done && !i.dropped; });
       leftoverTotal = leftovers.length;
       showNextLeftover();
     }
@@ -893,8 +1223,7 @@
         return;
       }
       const i = leftovers[0];
-      let info = 'From ' + niceDate(i.date);
-      if (i.start) info += ', ' + i.start + (i.end ? '–' + i.end : '');
+      const info = 'From ' + whenText(i);
       field('lo-counter').textContent = (leftoverTotal - leftovers.length + 1) + '/' + leftoverTotal;
       field('lo-name').textContent = i.name;
       field('lo-info').textContent = info;
@@ -931,9 +1260,116 @@
       if (picked <= todayKey()) { field('lo-error').textContent = 'Pick a day after today.'; return; }
       answerLeftover(function (i) { i.date = picked; });
     };
-    field('lo-drop').onclick = function () {
-      answerLeftover(function (i) { i.dropped = true; });   // kept in the history as "not done"
+    field('lo-done').onclick = function () {
+      answerLeftover(function (i) { i.done = true; });      // goes in the Record as completed, on its own day
     };
+    field('lo-drop').onclick = function () {
+      answerLeftover(function (i) { i.dropped = true; });   // goes in the Record as not completed
+    };
+
+    // STEP 10b: SUGGESTIONS: things you might want to do today, grouped by category.
+    // Each category is a small "recipe": a title, an icon, a color, how to find its things,
+    // and what "+" does. New areas (Chores, Projects...) will add their own category here.
+    const suggSheet = field('sugg-sheet');
+
+    function daysFromToday(n) {
+      const d = new Date();
+      d.setDate(d.getDate() + n);
+      return dateKey(d);
+    }
+
+    const categories = [
+      {
+        title: 'COMING UP', icon: 'ti-calendar-due', color: 'var(--yellow)',
+        empty: 'Nothing due in the next 7 days.',
+        // Tasks and reminders planned for the next 7 days
+        find: function () {
+          return items.filter(function (i) {
+            return i.type !== 'event' && !i.done && !i.dropped && i.date > todayKey() && i.date <= daysFromToday(7);
+          }).sort(byPressing);   // most important first, then the closest date
+        },
+        // "+" moves it to today
+        add: function (i) { i.date = todayKey(); }
+      },
+      {
+        title: 'NOT DONE BEFORE', icon: 'ti-rotate', color: 'var(--red)',
+        empty: 'Nothing left behind. Nice!',
+        // Things you marked as "not done" (the most recent 10, no repeats, not already on today)
+        find: function () {
+          const seen = [];
+          itemsForDay(todayKey()).untimed.concat(itemsForDay(todayKey()).timed).forEach(function (e) { seen.push(e.data.name); });
+          return items.filter(function (i) { return i.dropped; })
+            .sort(function (a, b) { return ((b.imp || 0) - (a.imp || 0)) || (a.date > b.date ? -1 : 1); })   // most important, then most recent
+            .filter(function (i) {
+              if (seen.indexOf(i.name) !== -1) return false;
+              seen.push(i.name);
+              return true;
+            }).slice(0, 10);
+        },
+        // "+" makes a fresh copy for today, so the Record still shows the old one as not done
+        add: function (i) {
+          items.push({ id: Date.now(), type: i.type, name: i.name, date: todayKey(), start: i.start, end: i.end, dur: i.dur || 0, done: false });
+        }
+      },
+      { title: 'CHORES',   icon: 'ti-bucket', color: 'var(--cyan)',   locked: 'Unlocks when we build Chores.' },
+      { title: 'PROJECTS', icon: 'ti-folder', color: 'var(--purple)', locked: 'Unlocks when we build Projects.' }
+    ];
+
+    function drawSuggestions() {
+      const box = field('sugg-content');
+      box.innerHTML = '';
+
+      categories.forEach(function (cat) {
+        const head = document.createElement('p');
+        head.className = 'sugg-cat pixel';
+        head.style.color = cat.color;
+        head.innerHTML = '<i class="ti ' + cat.icon + '"></i><span></span>';
+        head.children[1].textContent = cat.title;
+        box.appendChild(head);
+
+        const list = document.createElement('div');
+        list.className = 'sugg-list';
+        box.appendChild(list);
+
+        if (cat.locked) {
+          list.innerHTML = '<div class="sugg-locked"><i class="ti ti-lock"></i><span></span></div>';
+          list.querySelector('span').textContent = cat.locked;
+          return;
+        }
+
+        const found = cat.find();
+        if (!found.length) {
+          list.innerHTML = '<div class="sugg-empty"></div>';
+          list.firstChild.textContent = cat.empty;
+          return;
+        }
+
+        found.forEach(function (i) {
+          const row = document.createElement('div');
+          row.className = 'sugg-row';
+          row.innerHTML = '<div><span class="n"></span><span class="info"></span></div><button type="button" class="sugg-add" aria-label="Add to today"><i class="ti ti-plus"></i></button>';
+          row.querySelector('.n').textContent = i.name;
+          const stars = starsFor(i);
+          if (stars) row.querySelector('.n').appendChild(stars);
+          row.querySelector('.info').textContent = (i.type === 'task' ? 'Task' : 'Reminder') + ' · ' + whenText(i);
+
+          const btn = row.querySelector('.sugg-add');
+          btn.onclick = function () {
+            if (btn.classList.contains('added')) return;   // only once
+            cat.add(i);
+            saveItems();
+            btn.classList.add('added');
+            btn.innerHTML = '<i class="ti ti-check"></i>';
+            redraw();
+          };
+          list.appendChild(row);
+        });
+      });
+    }
+
+    field('sugg-btn').onclick = function () { drawSuggestions(); suggSheet.classList.remove('hidden'); };
+    field('sugg-close').onclick = function () { suggSheet.classList.add('hidden'); };
+    suggSheet.onclick = function (e) { if (e.target === suggSheet) suggSheet.classList.add('hidden'); };
 
     // STEP 11: Start everything
     let shownDay = '';
