@@ -272,10 +272,10 @@
 
 
     /* ---- Widgets on Home (like iPhone widgets) ----
-       The grid has 3 columns, and counts height in HALF-rows (2 half-rows = a column's width):
-         small  = 1 column,  2 half-rows → a square (3 fit in a row)
-         medium = 3 columns, 2 half-rows → a full row, as tall as a small
-         large  = 3 columns, 3 half-rows → a full row, 1.5 times as tall as a medium */
+       The grid has 3 columns, and counts height in small steps (2 steps = a column's width):
+         small  = 1 column,  2 steps → a square, half as tall as a large (3 fit in a row)
+         medium = 3 columns, 3 steps → a full row, 3/4 as tall as a large
+         large  = 3 columns, 4 steps → a full row */
     .widgets-head { margin: 4px 0 10px; }
     .small-btn.bolt { color: var(--yellow); border-color: rgba(255, 225, 77, 0.6); padding: 6px 10px; }
     .small-btn.bolt i { font-size: 18px; }
@@ -297,8 +297,8 @@
       -webkit-tap-highlight-color: transparent;
     }
     .widget.small  { grid-column: span 1; grid-row: span 2; }
-    .widget.medium { grid-column: span 3; grid-row: span 2; }
-    .widget.large  { grid-column: span 3; grid-row: span 3; }
+    .widget.medium { grid-column: span 3; grid-row: span 3; }
+    .widget.large  { grid-column: span 3; grid-row: span 4; }
     .widget .wtitle { font-family: 'Press Start 2P', monospace; font-size: 7px; color: var(--c); display: flex; align-items: center; gap: 5px; margin: 0 0 2px; }
     .widget .wtitle i { font-size: 12px; }
     .widget .wempty { color: var(--dim); font-size: 12px; margin: auto 0; }
@@ -326,14 +326,14 @@
     /* large calendar: the month on the left, the next events on the right */
     .wsplit { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex: 1; min-height: 0; }
     .wsplit > div { display: flex; flex-direction: column; gap: 3px; min-width: 0; min-height: 0; overflow: hidden; }
-    .wmonth { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; text-align: center; font-size: 10px; }
-    .wmonth span { padding: 2px 0; border-radius: 5px; position: relative; }
+    .wmonth { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; font-size: 12px; }
+    .wmonth span { padding: 5px 0; border-radius: 6px; position: relative; }
     .wmonth .h { color: var(--cyan); font-size: 8px; }
     .wmonth .o { opacity: 0.3; }
     .wmonth .t { color: var(--bg); background: var(--yellow); font-weight: 600; }
     .wmonth .ev::after { content: ''; position: absolute; left: 50%; bottom: 0; width: 3px; height: 3px; margin-left: -1.5px; border-radius: 50%; background: var(--yellow); }
     .wmonth .t.ev::after { background: var(--bg); }
-    .wsplit .wrow { font-size: 12px; }
+    .wsplit .wrow { font-size: 13px; padding: 2px 0; }
     .wsplit .wrow .ww { font-size: 10px; }
 
     /* widget chooser panel */
@@ -3102,7 +3102,7 @@
             day.firstChild.textContent = DAY_LETTERS[d];
             const dayEvents = items.filter(function (i) { return i.type === 'event' && i.date === key; })
               .sort(function (a, b) { return (a.start || '') < (b.start || '') ? -1 : 1; });
-            dayEvents.slice(0, 2).forEach(function (ev) {
+            dayEvents.slice(0, 3).forEach(function (ev) {
                 const tag = document.createElement('span');
                 tag.className = 'we';
                 tag.textContent = ev.name;
@@ -3110,10 +3110,10 @@
                 if (cat) { tag.style.color = cat.color; tag.style.background = tint(cat.color, 0.18); }
                 day.appendChild(tag);
               });
-            if (dayEvents.length > 2) {                       // "+1" when there are more
+            if (dayEvents.length > 3) {                       // "+1" when there are more
               const more = document.createElement('span');
               more.className = 'wmore';
-              more.textContent = '+' + (dayEvents.length - 2);
+              more.textContent = '+' + (dayEvents.length - 3);
               day.appendChild(more);
             }
             week.appendChild(day);
@@ -3164,12 +3164,12 @@
           list.forEach(function (i) { widgetRow(box, i, false, true); });
         },
         medium: function (box) {           // this week, most pressing first
-          const list = upcomingReminders().filter(function (i) { return i.date <= daysFromToday(6); }).slice(0, 3);
+          const list = upcomingReminders().filter(function (i) { return i.date <= daysFromToday(6); }).slice(0, 5);
           if (!list.length) return widgetEmpty(box, 'Nothing this week.');
           list.forEach(function (i) { widgetRow(box, i, false); });
         },
         large: function (box) {            // even more, with their details
-          const list = upcomingReminders().slice(0, 5);
+          const list = upcomingReminders().slice(0, 6);
           if (!list.length) return widgetEmpty(box, 'No reminders. Nice!');
           list.forEach(function (i) { widgetRow(box, i, true); });
         }
