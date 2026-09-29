@@ -220,11 +220,11 @@
     .small-btn i { font-size: 16px; }
 
     /* ---- The Record page ---- */
-    .record-head { display: flex; justify-content: space-between; align-items: center; }
     .record-head .score { color: var(--purple); text-shadow: none; }
     .item.record { grid-template-columns: 42px 1fr 24px; }
     .item.record .name { cursor: default; }
     .item.record.done .name { text-decoration: none; color: var(--text); }
+    .item.record.done .dur  { text-decoration: none; opacity: 1; }
     .status-done   { color: var(--pink);  text-shadow: 0 0 8px var(--pink); }
     .status-missed { color: var(--red); }
     .status-wait   { color: var(--yellow); }
@@ -232,6 +232,18 @@
     .type-tag.task     { color: var(--pink); }
     .type-tag.reminder { color: var(--green); }
     .back-btn { margin: 4px 0 10px; }
+
+
+    /* Record: day headings you can tap to fold/unfold */
+    .record-head {
+      width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px;
+      background: none; border: none; padding: 0; margin: 14px 0 8px; cursor: pointer; font: inherit;
+    }
+    .record-head .day-heading { margin: 0; display: flex; align-items: center; gap: 6px; }
+    .record-head .chev { font-size: 14px; transition: transform 0.2s; }
+    .record-head.folded .chev { transform: rotate(-90deg); }
+    .status-event { color: var(--yellow); opacity: 0.7; }
+    .type-tag.event { color: var(--yellow); }
 
     /* ---- The Suggestions panel ---- */
     .sugg-cat { display: flex; align-items: center; gap: 8px; font-size: 10px; margin: 8px 0 0; }
@@ -420,6 +432,187 @@
     .later-row { display: flex; gap: 8px; }
     .later-row input { flex: 1; }
     .counter { font-size: 10px; color: var(--dim); align-self: flex-end; }
+
+    /* ================= CALENDAR ================= */
+    /* The Routine / Month switch */
+    .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--field); border-radius: 12px; padding: 4px; margin: 4px 0 14px; }
+    .seg button { font: inherit; font-size: 14px; padding: 8px; border: none; border-radius: 9px; background: none; color: var(--dim); cursor: pointer; }
+    .seg button.on { background: var(--cyan); color: var(--bg); box-shadow: 0 0 8px var(--cyan); }
+
+    /* The "‹ Sep 27 – Oct 3 ›" week switcher */
+    .week-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+    .week-nav .arrow { width: 44px; height: 38px; border-radius: 10px; border: 2px solid rgba(41, 231, 255, 0.4); background: none; color: var(--cyan); font-size: 20px; cursor: pointer; }
+    .week-nav .label { text-align: center; font-size: 15px; }
+    .week-nav .label button { display: block; margin: 2px auto 0; font: inherit; font-size: 12px; color: var(--yellow); background: none; border: none; cursor: pointer; }
+
+    /* The week grid: a thin column for the hours, then 7 day columns */
+    .rgrid { --hour: 44px; border-radius: var(--round); padding: 6px 4px 8px; margin-bottom: 6px; }
+    .rrow { display: grid; grid-template-columns: 30px repeat(7, minmax(0, 1fr)); }
+    .rhead div { text-align: center; font-size: 11px; color: var(--cyan); padding: 2px 0 6px; line-height: 1.2; }
+    .rhead div b { display: block; font-size: 14px; font-weight: 600; color: var(--text); }
+    .rhead .today, .rhead .today b { color: var(--yellow); text-shadow: 0 0 6px var(--yellow); }
+    .rallday .rcell { padding: 0 1px 4px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .rallday .ev {
+      font-size: 9px; padding: 2px 3px; border-radius: 4px; color: var(--yellow);
+      border: 1px solid var(--yellow); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
+    }
+    /* The hours part scrolls on its own: it shows 9 hours at a time */
+    .rscroll { overflow-y: auto; height: calc(var(--hour) * 9); overscroll-behavior: contain; }
+    .rhours { position: relative; }
+    .rhours span { position: absolute; right: 4px; font-size: 9px; color: var(--dim); transform: translateY(-50%); }
+    .rcol {
+      position: relative;
+      border-left: 1px solid rgba(41, 231, 255, 0.12);
+      /* a faint line every hour, and a fainter one at every half hour */
+      background-image:
+        repeating-linear-gradient(to bottom, rgba(41, 231, 255, 0.16) 0 1px, transparent 1px var(--hour)),
+        repeating-linear-gradient(to bottom, transparent 0 calc(var(--hour) / 2),
+          rgba(41, 231, 255, 0.07) calc(var(--hour) / 2) calc(var(--hour) / 2 + 1px),
+          transparent calc(var(--hour) / 2 + 1px) var(--hour));
+    }
+    .rcol.today { background-color: rgba(255, 225, 77, 0.05); }
+
+    /* A block in the grid. Its color shows its category; dashed = temporary. */
+    .rblock {
+      --c: var(--cyan);
+      position: absolute;
+      border-radius: 6px;
+      padding: 2px 3px;
+      font-size: 10px;
+      line-height: 1.15;
+      overflow: hidden;              /* long names get cut off at the edge instead of breaking letters */
+      border: 1.5px solid var(--c);
+      background: rgba(41, 231, 255, 0.18);
+      background: color-mix(in srgb, var(--c) 20%, transparent);
+      color: var(--text);
+      cursor: grab;
+      touch-action: none;             /* lets your finger drag it instead of scrolling */
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      z-index: 2;
+    }
+    .rblock .bt { display: block; font-size: 9px; color: var(--dim); }
+    .rblock.temp    { border-style: dashed; }
+    .rblock.temp.plain { --c: var(--pink); }
+    .rblock.event {
+      --c: var(--yellow);
+      background: repeating-linear-gradient(45deg, rgba(255, 225, 77, 0.25) 0 4px, rgba(255, 225, 77, 0.08) 4px 8px);
+      cursor: pointer;
+      touch-action: auto;
+    }
+    .rblock.skipped { --c: var(--dim); border-style: dashed; background: none; color: var(--dim); text-decoration: line-through; z-index: 1; cursor: pointer; touch-action: auto; }
+    .rblock.stacked { box-shadow: -3px 0 0 var(--bg), 0 0 8px rgba(0, 0, 0, 0.6); }   /* a dark edge so stacked blocks stand apart */
+    .rblock.dragging { opacity: 0.25; }
+    .rblock.ghost { position: fixed; z-index: 60; pointer-events: none; opacity: 0.9; box-shadow: 0 0 14px var(--c); }
+
+    /* Where the block will land while you drag it */
+    .rpreview { position: absolute; left: 1px; right: 1px; border-radius: 6px; border: 2px dashed var(--yellow); background: rgba(255, 225, 77, 0.15); pointer-events: none; z-index: 5; }
+    .rpreview span { position: absolute; top: 2px; left: 3px; font-size: 9px; color: var(--yellow); }
+    /* The red "now" line on today */
+    .rnow { position: absolute; left: 0; right: 0; height: 2px; background: var(--red); box-shadow: 0 0 6px var(--red); z-index: 4; pointer-events: none; }
+
+    /* The block shelves under the grid */
+    .shelf-title { display: flex; justify-content: space-between; align-items: center; margin: 18px 0 8px; }
+    .shelf-title .pixel { font-size: 10px; margin: 0; }
+    .shelf { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chipblock {
+      --c: var(--cyan);
+      display: flex; align-items: center; gap: 6px;
+      padding: 9px 11px; border-radius: 10px; font-size: 14px;
+      border: 2px solid var(--c);
+      background: rgba(41, 231, 255, 0.1);
+      background: color-mix(in srgb, var(--c) 12%, transparent);
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+    .chipblock small { color: var(--purple); font-size: 11px; }
+    .chipblock.temp    { border-style: dashed; }
+    .chipblock.temp.plain { --c: var(--pink); }
+    .shelf-empty { color: var(--dim); font-size: 13px; }
+
+    /* Small category labels (like CHORE). Their color comes from the category. */
+    .chip { display: inline-block; font-family: 'Press Start 2P', monospace; font-size: 7px; padding: 3px 4px; border-radius: 4px; vertical-align: middle; margin-right: 6px; }
+    .item.routine.temp { border-left-style: dashed; }
+    .item.routine .name, .item.routine .time { cursor: pointer; }
+
+    /* Category choices in the block panel (the colors come from each category) */
+    .label-row { display: flex; justify-content: space-between; align-items: center; margin: 0 0 6px; }
+    .label-row .imp-label { margin: 0; }
+    .link-btn { font: inherit; font-size: 13px; color: var(--purple); background: none; border: none; cursor: pointer; padding: 0; }
+    .opts { display: flex; flex-wrap: wrap; gap: 6px; }
+    .opt {
+      --c: var(--cyan);
+      font: inherit; font-size: 14px; padding: 8px 12px; border-radius: 10px;
+      background: var(--field); color: var(--dim);
+      border: 2px solid rgba(143, 138, 184, 0.35); cursor: pointer;
+    }
+    .opt.on { color: var(--text); border-color: var(--c); box-shadow: 0 0 8px var(--c); }
+    .opt.new { border-style: dashed; color: var(--purple); }
+    .new-cat { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: 12px; border: 2px dashed rgba(181, 156, 255, 0.5); }
+    .new-cat .row { display: flex; gap: 8px; }
+    .new-cat .row input { flex: 1; }
+
+    /* Color dots to pick a category's color */
+    .swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+    .swatch { width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; }
+    .swatch.on { border-color: var(--text); box-shadow: 0 0 8px currentColor; }
+
+    /* Day buttons (Su Mo Tu ...) in the block panel */
+    .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .dayb {
+      font: inherit; font-size: 13px; padding: 9px 0; border-radius: 9px;
+      background: var(--field); color: var(--dim);
+      border: 2px solid rgba(143, 138, 184, 0.35); cursor: pointer;
+    }
+    .dayb.on { color: var(--bg); background: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+
+    /* The Categories editor */
+    .cat-row { display: grid; grid-template-columns: 36px 1fr 44px; gap: 8px; align-items: center; }
+    .cat-dot { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--text); cursor: pointer; padding: 0; }
+    .cat-del { height: 44px; border-radius: 10px; background: none; border: 2px solid var(--red); color: var(--red); font-size: 18px; cursor: pointer; }
+    .cat-colors { grid-column: 1 / -1; }
+
+
+    /* ---- The Month view ---- */
+    .month { border-radius: var(--round); padding: 6px; margin-bottom: 8px; }
+    .mhead, .mgrid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+    .mhead span { text-align: center; font-size: 11px; color: var(--cyan); padding: 2px 0 6px; }
+    .mcell {
+      min-height: 66px; padding: 3px; border-radius: 8px;
+      background: var(--field); border: 1.5px solid transparent;
+      display: flex; flex-direction: column; gap: 2px; min-width: 0;
+      font: inherit; color: var(--text); text-align: left; cursor: pointer;
+    }
+    .mcell .num { font-size: 12px; font-weight: 600; }
+    .mcell.other { opacity: 0.35; }                     /* days from the month before/after */
+    .mcell.past .num { color: var(--dim); }
+    .mcell.today .num { color: var(--yellow); text-shadow: 0 0 6px var(--yellow); }
+    .mcell.today { border-color: rgba(255, 225, 77, 0.5); }
+    .mcell.selected { border-color: var(--pink); box-shadow: 0 0 8px var(--pink); }
+    .mcell .mev {
+      font-size: 9px; line-height: 1.2; padding: 1px 3px; border-radius: 3px;
+      background: rgba(255, 225, 77, 0.18); color: var(--yellow);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .mcell .more { font-size: 9px; color: var(--dim); }
+    .mcell .dots { display: flex; gap: 2px; margin-top: auto; }
+    .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; }
+    .mlegend { display: flex; gap: 14px; justify-content: center; font-size: 12px; color: var(--dim); margin: 0 0 6px; }
+    .mlegend span { display: flex; align-items: center; gap: 5px; }
+
+    /* A short message that pops up at the bottom and fades away */
+    .toast {
+      position: fixed; left: 50%; bottom: 120px; transform: translateX(-50%);
+      max-width: 88%; padding: 10px 14px; border-radius: 12px;
+      background: var(--bg); color: var(--text); font-size: 14px; text-align: center;
+      border: 2px solid var(--yellow); box-shadow: 0 0 10px rgba(255, 225, 77, 0.5);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s; z-index: 70;
+    }
+    .toast.show { opacity: 1; }
   </style>
 </head>
 
@@ -495,17 +688,94 @@
 
     <!-- PAGE: REMINDERS -->
     <section id="page-reminders" class="hidden">
-      <h1 class="page-title pixel" style="color: var(--green); text-shadow: 0 0 10px var(--green)">REMINDERS</h1>
+      <div class="title-row">
+        <h1 class="page-title pixel" style="color: var(--green); text-shadow: 0 0 10px var(--green)">REMINDERS</h1>
+        <button class="small-btn" id="rem-record-btn"><i class="ti ti-history"></i>Record</button>
+      </div>
       <p class="date"><span>Today and coming up</span></p>
       <div id="reminders-list"></div>
       <button class="add green" id="add-reminder-btn"><i class="ti ti-plus"></i> Add reminder</button>
     </section>
 
+    <!-- PAGE: CALENDAR (Routine week view; Month comes next) -->
+    <section id="page-calendar" class="hidden">
+      <div class="title-row">
+        <h1 class="page-title pixel">CALENDAR</h1>
+        <button class="small-btn" id="cal-record-btn"><i class="ti ti-history"></i>Record</button>
+      </div>
+      <div class="seg">
+        <button type="button" class="on" id="cal-routine">Routine</button>
+        <button type="button" id="cal-month">Month</button>
+      </div>
+
+      <div id="routine-view">
+        <div class="week-nav">
+          <button type="button" class="arrow" id="wk-prev" aria-label="Previous week">‹</button>
+          <div class="label"><span id="wk-label"></span><button type="button" id="wk-today">Back to this week</button></div>
+          <button type="button" class="arrow" id="wk-next" aria-label="Next week">›</button>
+        </div>
+
+        <!-- The week grid. The script builds it. -->
+        <div class="rgrid glow-cyan" id="rgrid">
+          <div class="rrow rhead" id="rgrid-head"></div>
+          <div class="rrow rallday" id="rgrid-allday"></div>
+          <!-- The hours scroll inside this box (9 hours visible at a time) -->
+          <div class="rscroll" id="rgrid-scroll">
+            <div class="rrow" id="rgrid-body"></div>
+          </div>
+        </div>
+        <div class="title-row" style="margin: 0">
+          <p class="hint" style="margin: 0">Drag a block onto the week. Tap a block for options.</p>
+          <button type="button" class="small-btn" id="open-cats"><i class="ti ti-tags"></i>Categories</button>
+        </div>
+
+        <!-- Shelves: the blocks you can drag onto the week -->
+        <div class="shelf-title">
+          <p class="pixel" style="color: var(--cyan)">PERMANENT BLOCKS</p>
+          <button type="button" class="small-btn" id="new-perm"><i class="ti ti-plus"></i>New</button>
+        </div>
+        <div class="shelf" id="shelf-perm"></div>
+
+        <div class="shelf-title">
+          <p class="pixel" style="color: var(--pink)">TEMPORARY BLOCKS</p>
+          <button type="button" class="small-btn" id="new-temp"><i class="ti ti-plus"></i>New</button>
+        </div>
+        <div class="shelf" id="shelf-temp"></div>
+      </div>
+
+      <div id="month-view" class="hidden">
+        <div class="week-nav">
+          <button type="button" class="arrow" id="mo-prev" aria-label="Previous month">‹</button>
+          <div class="label"><span id="mo-label"></span><button type="button" id="mo-today">Back to this month</button></div>
+          <button type="button" class="arrow" id="mo-next" aria-label="Next month">›</button>
+        </div>
+
+        <!-- The month grid. The script builds it. -->
+        <div class="month glow-cyan">
+          <div class="mhead"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
+          <div class="mgrid" id="mgrid"></div>
+        </div>
+        <div class="mlegend">
+          <span><i class="dot" style="background: var(--yellow)"></i>Event</span>
+          <span><i class="dot" style="background: var(--green)"></i>Reminder</span>
+          <span><i class="dot" style="background: var(--pink)"></i>Task</span>
+        </div>
+
+        <!-- The day you tapped -->
+        <h2 class="day-heading pixel" id="mday-title" style="color: var(--yellow); text-shadow: 0 0 6px var(--yellow)"></h2>
+        <div class="list glow-cyan" id="mday-list"></div>
+        <button type="button" class="add yellow" id="mday-add"><i class="ti ti-plus"></i> Add event</button>
+      </div>
+    </section>
+
     <!-- PAGE: RECORD (past tasks and reminders: done or not done) -->
     <section id="page-record" class="hidden">
-      <button class="small-btn back-btn" id="record-back"><i class="ti ti-arrow-left"></i>Home</button>
+      <button class="small-btn back-btn" id="record-back"><i class="ti ti-arrow-left"></i><span id="record-back-label">Home</span></button>
       <h1 class="page-title pixel" style="color: var(--purple); text-shadow: 0 0 10px var(--purple)">RECORD</h1>
-      <p class="date"><span>Past tasks and reminders</span><span id="record-total" class="score pixel" style="color: var(--purple); text-shadow: none"></span></p>
+      <p class="date"><span id="record-sub">Everything so far</span><span id="record-total" class="score pixel" style="color: var(--purple); text-shadow: none"></span></p>
+      <!-- Filter buttons (only on the Record you open from Home) -->
+      <div class="opts" id="record-filters" style="margin-bottom: 6px"></div>
+      <p class="hint" style="margin: 0 0 4px">Tap a day to fold or unfold it.</p>
       <div id="record-list"></div>
     </section>
 
@@ -553,6 +823,22 @@
           <button type="button" class="imp" data-imp="1">★</button>
           <button type="button" class="imp" data-imp="2">★★</button>
           <button type="button" class="imp" data-imp="3">★★★</button>
+        </div>
+      </div>
+
+      <!-- CATEGORY (events only): the same categories as the routine -->
+      <div id="f-cat-fields" class="hidden">
+        <div class="label-row">
+          <p class="imp-label">Category</p>
+          <button type="button" class="link-btn" id="f-edit-cats">Edit categories</button>
+        </div>
+        <div class="opts" id="f-cats"></div>
+        <div class="new-cat hidden" id="f-newcat">
+          <div class="row">
+            <input id="f-ncname" type="text" placeholder="Birthdays" autocomplete="off">
+            <div class="buttons"><button type="button" class="primary" id="f-ncadd">Add</button></div>
+          </div>
+          <div class="swatches" id="f-nccolors"></div>
         </div>
       </div>
 
@@ -648,6 +934,94 @@
     </div>
   </div>
 
+  <!-- POP-UP PANEL for making or editing a routine block -->
+  <div class="sheet hidden" id="block-sheet">
+    <form class="panel glow-cyan" id="block-form" novalidate>
+      <h2 class="pixel" id="block-title" style="color: var(--cyan); text-shadow: 0 0 8px var(--cyan)">NEW BLOCK</h2>
+      <p class="hint" id="block-hint" style="margin: 0"></p>
+      <label>Name
+        <input id="b-name" type="text" placeholder="Work" autocomplete="off">
+      </label>
+
+      <!-- PERMANENT ONLY: start time first, then end time or duration -->
+      <label id="b-start-wrap"><span>Start <small>(needed if you pick days)</small></span>
+        <span class="with-clear">
+          <input id="b-start" type="time" step="900">
+          <button type="button" class="clear-btn" data-clear="b-start" aria-label="Clear start">×</button>
+        </span>
+      </label>
+      <div class="switch" id="b-switch">
+        <button type="button" id="bm-end" class="on">End time</button>
+        <button type="button" id="bm-dur">Duration</button>
+      </div>
+      <label id="b-end-wrap">End
+        <span class="with-clear">
+          <input id="b-end" type="time" step="900">
+          <button type="button" class="clear-btn" data-clear="b-end" aria-label="Clear end">×</button>
+        </span>
+      </label>
+
+      <!-- DURATION (temporary blocks always use this) -->
+      <label id="b-dur-wrap">Duration
+        <select id="b-dur"></select>
+      </label>
+
+      <!-- PERMANENT ONLY: days, to place it on the week without dragging -->
+      <div id="b-days-wrap">
+        <p class="imp-label">Days</p>
+        <div class="days" id="b-days"></div>
+        <p class="hint" id="b-days-hint" style="margin-top: 8px"></p>
+      </div>
+
+      <!-- CATEGORY: pick one you made before, or make a new one right here -->
+      <div>
+        <div class="label-row">
+          <p class="imp-label">Category</p>
+          <button type="button" class="link-btn" id="b-edit-cats">Edit categories</button>
+        </div>
+        <div class="opts" id="b-cats"></div>
+        <div class="new-cat hidden" id="b-newcat">
+          <div class="row">
+            <input id="b-ncname" type="text" placeholder="Homework" autocomplete="off">
+            <div class="buttons"><button type="button" class="primary" id="b-ncadd">Add</button></div>
+          </div>
+          <div class="swatches" id="b-nccolors"></div>
+        </div>
+      </div>
+
+      <p class="error" id="b-error"></p>
+      <div class="buttons">
+        <button type="button" class="danger hidden" id="b-delete">Delete</button>
+        <button type="button" id="b-cancel">Cancel</button>
+        <button type="submit" class="primary">Save</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- POP-UP PANEL: edit your categories (add, rename, recolor, delete) -->
+  <div class="sheet hidden" id="cat-sheet">
+    <div class="panel glow-pink">
+      <h2 class="pixel">CATEGORIES</h2>
+      <p class="hint" style="margin: 0">Tap a color dot to change it. Changes save right away.</p>
+      <div class="fields" id="cat-list"></div>
+      <button type="button" class="add" style="margin: 0" id="cat-add"><i class="ti ti-plus"></i> Add category</button>
+      <div class="buttons"><button type="button" class="primary" id="cat-done">Done</button></div>
+    </div>
+  </div>
+
+  <!-- POP-UP PANEL with options for a block in the week (the script fills in the choices) -->
+  <div class="sheet hidden" id="act-sheet">
+    <div class="panel glow-cyan">
+      <h2 class="pixel" id="act-title" style="color: var(--cyan); text-shadow: 0 0 8px var(--cyan)"></h2>
+      <p class="quest-info" id="act-info"></p>
+      <div class="choices" id="act-choices"></div>
+      <div class="buttons"><button type="button" id="act-close">Close</button></div>
+    </div>
+  </div>
+
+  <!-- The little message that pops up and fades -->
+  <div class="toast" id="toast"></div>
+
   <!-- ========== PART 4: THE "SCRIPT" (JavaScript) ==========
        This is what the app DOES. -->
   <script>
@@ -680,6 +1054,10 @@
       if (h) return h + 'h';
       return m + 'm';
     }
+    // A unique name tag for each new thing, so two things never get mixed up
+    let idCounter = 0;
+    function newId() { return Date.now() + '-' + (idCounter++) + '-' + Math.random().toString(36).slice(2, 6); }
+
     function sortByTime(a, b) { return toMinutes(a.data.start) - toMinutes(b.data.start); }
 
     // How long something lasts, in minutes: from start to end, or its own duration if it has no start
@@ -728,8 +1106,7 @@
     items.forEach(function (i) { if (!i.type) i.type = 'task'; });   // older tasks didn't have a type yet
     function saveItems() { save('brainfog-tasks', items); }
 
-    // STEP 3: TEMPORARY example, just to see the layout. Level 4 replaces it with your real routine.
-    const demoRoutine = [ { name: 'Work', start: '07:30', end: '15:00' } ];
+    // STEP 3: Your routine is set in Calendar → Routine (see STEP 12). Home shows the blocks for each day.
 
     // STEP 4: Draw one row of a list
     function makeRow(item) {
@@ -765,8 +1142,27 @@
       slot.className = 'slot';
       if (item.kind === 'routine') {
         slot.innerHTML = '<i class="ti ti-repeat"></i>';
+        if (item.data.temp) row.classList.add('temp');     // temporary blocks get a dashed stripe
+        if (item.data.cat) {                                // category label (like CHORE) before the name
+          const chip = document.createElement('span');
+          chip.className = 'chip';
+          chip.textContent = item.data.cat.name.toUpperCase();
+          chip.style.color = item.data.cat.color;
+          chip.style.background = tint(item.data.cat.color, 0.18);
+          name.insertBefore(chip, name.firstChild);
+        }
+        time.onclick = name.onclick = function () { showPage('calendar'); };   // change it in the routine
       } else if (item.kind === 'event') {
         slot.innerHTML = '<i class="ti ti-calendar-event"></i>';
+        const cat = catById(item.data.cat);
+        if (cat) {                                          // category label before the name
+          const chip = document.createElement('span');
+          chip.className = 'chip';
+          chip.textContent = cat.name.toUpperCase();
+          chip.style.color = cat.color;
+          chip.style.background = tint(cat.color, 0.18);
+          name.insertBefore(chip, name.firstChild);
+        }
         time.onclick = name.onclick = function () { openSheet(item.data); };   // tap to edit
       } else {
         slot.innerHTML = '<div class="check"></div>';
@@ -790,9 +1186,7 @@
     function itemsForDay(key) {
       const untimed = [];
       const timed = [];
-      if (key === todayKey()) {
-        demoRoutine.forEach(function (r) { timed.push({ kind: 'routine', data: r }); });
-      }
+      routineForDay(key).forEach(function (r) { timed.push({ kind: 'routine', data: r }); });
       items.forEach(function (i) {
         if (i.date !== key || i.dropped) return;
         const entry = { kind: i.type, data: i };
@@ -882,13 +1276,14 @@
     };
     let currentPage = 'home';
 
-    const builtPages = ['home', 'reminders', 'record'];   // pages that exist; the rest show "Locked"
+    const builtPages = ['home', 'reminders', 'record', 'calendar'];   // pages that exist; the rest show "Locked"
 
     function showPage(page) {
       currentPage = page;
       document.querySelectorAll('.tab').forEach(function (tab) {
         // The Record page belongs to Home, so Home stays lit up there
-        tab.classList.toggle('active', tab.dataset.page === page || (page === 'record' && tab.dataset.page === 'home'));
+        // The Record belongs to the page that opened it, so that page's button stays lit
+        tab.classList.toggle('active', tab.dataset.page === page || (page === 'record' && tab.dataset.page === recordFrom));
       });
       builtPages.forEach(function (p) {
         document.getElementById('page-' + p).classList.toggle('hidden', page !== p);
@@ -898,104 +1293,188 @@
       if (builtPages.indexOf(page) === -1) document.getElementById('locked-name').textContent = pageNames[page];
       redraw();
       document.getElementById('main').scrollTop = 0;
+      if (page === 'calendar') field('rgrid-scroll').scrollTop = OPEN_AT * HOUR_H;   // start at 05:00
     }
     document.querySelectorAll('.tab').forEach(function (tab) {
       tab.onclick = function () { showPage(tab.dataset.page); };
     });
-    document.getElementById('record-btn').onclick = function () { showPage('record'); };
-    document.getElementById('record-back').onclick = function () { showPage('home'); };
+    document.getElementById('record-btn').onclick = function () { openRecord('home', 'all'); };
+    document.getElementById('rem-record-btn').onclick = function () { openRecord('reminders', 'reminder'); };
+    document.getElementById('cal-record-btn').onclick = function () { openRecord('calendar', 'event'); };
+    document.getElementById('record-back').onclick = function () { showPage(recordFrom); };
 
     // Redraw whatever page is showing (after adding, editing or deleting)
     function redraw() {
       if (currentPage === 'reminders') drawReminders();
       else if (currentPage === 'record') drawRecord();
+      else if (currentPage === 'calendar') drawCalendar();
       else drawHome();
     }
 
-    // STEP 8b: The RECORD page: newest day first, with completed / not completed for each thing.
-    // Things you check off go in right away. Unchecked things go in once you answer the
-    // Leftover quest the next day (as completed, or as not completed if you dismiss them).
-    function drawRecord() {
-      const page = document.getElementById('record-list');
-      page.innerHTML = '';
+    // STEP 8b: The RECORD: newest day first.
+    //   From Home:      everything (tasks, reminders, events), with filter buttons
+    //   From Reminders: only reminders
+    //   From Calendar:  only events
+    // Tasks and reminders show completed / not completed. Things you check off go in right away;
+    // unchecked ones go in once you answer the Leftover quest. Events go in once they've happened.
+    // Tap a day's heading to fold or unfold it.
+    let recordFrom = 'home';      // which page opened the Record
+    let recordFilter = 'all';     // 'all', 'task', 'reminder' or 'event'
+    const folded = {};            // days you folded (or unfolded) yourself
 
-      // Everything from past days, plus anything already completed today or on a future day.
-      // (Events have no check, so they're not part of the record.)
-      const past = items.filter(function (i) {
-        return i.type !== 'event' && (i.date < todayKey() || i.done);
+    function openRecord(from, filter) {
+      recordFrom = from;
+      recordFilter = filter;
+      field('record-back-label').textContent = from === 'home' ? 'Home' : from === 'reminders' ? 'Reminders' : 'Calendar';
+      field('record-filters').classList.toggle('hidden', from !== 'home');
+      showPage('record');
+    }
+
+    const FILTERS = [
+      { id: 'all', name: 'All', color: '#b59cff' },
+      { id: 'task', name: 'Tasks', color: '#ff3fa4' },
+      { id: 'reminder', name: 'Reminders', color: '#5dff9b' },
+      { id: 'event', name: 'Events', color: '#ffe14d' }
+    ];
+
+    // Has this event already happened? (past day, or today and already over)
+    function eventHappened(i) {
+      if (i.date < todayKey()) return true;
+      if (i.date > todayKey() || !i.start) return false;
+      const now = new Date();
+      return toMinutes(i.end || i.start) <= now.getHours() * 60 + now.getMinutes();
+    }
+
+    function drawRecord() {
+      // Subtitle and filter buttons
+      field('record-sub').textContent = recordFilter === 'reminder' && recordFrom !== 'home' ? 'Past reminders'
+        : recordFilter === 'event' && recordFrom !== 'home' ? 'Past events' : 'Everything so far';
+      const filterBox = field('record-filters');
+      filterBox.innerHTML = '';
+      FILTERS.forEach(function (f) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'opt' + (f.id === recordFilter ? ' on' : '');
+        btn.textContent = f.name;
+        btn.style.setProperty('--c', f.color);
+        btn.onclick = function () { recordFilter = f.id; drawRecord(); };
+        filterBox.appendChild(btn);
       });
+
+      // What goes in the record, for this filter
+      const past = items.filter(function (i) {
+        if (recordFilter !== 'all' && i.type !== recordFilter) return false;
+        if (i.type === 'event') return eventHappened(i);
+        return i.date < todayKey() || i.done;
+      });
+
       const days = [];
       past.forEach(function (i) { if (days.indexOf(i.date) === -1) days.push(i.date); });
       days.sort().reverse();
 
-      const allDone = past.filter(function (i) { return i.done; }).length;
-      document.getElementById('record-total').textContent = past.length ? 'TOTAL ' + allDone + '/' + past.length : '';
+      // Totals at the top: completed out of checkable, and how many events
+      const checkable = past.filter(function (i) { return i.type !== 'event'; });
+      const doneAll = checkable.filter(function (i) { return i.done; }).length;
+      const eventCount = past.length - checkable.length;
+      const totals = [];
+      if (checkable.length) totals.push('TOTAL ' + doneAll + '/' + checkable.length);
+      if (eventCount) totals.push(eventCount + ' EVENT' + (eventCount === 1 ? '' : 'S'));
+      field('record-total').textContent = totals.join(' · ');
 
+      const page = field('record-list');
+      page.innerHTML = '';
       if (!days.length) {
-        page.innerHTML = '<div class="list glow-cyan"><div class="empty">Nothing here yet. Your past days will show up here.</div></div>';
+        page.innerHTML = '<div class="list glow-cyan"><div class="empty">Nothing here yet. It fills up as your days go by.</div></div>';
         return;
       }
 
-      days.forEach(function (key) {
+      days.forEach(function (key, n) {
         const dayItems = past.filter(function (i) { return i.date === key; });
-        // No time first, then by time
-        dayItems.sort(function (a, b) {
+        dayItems.sort(function (a, b) {        // no time first, then by time
           if (!a.start) return -1;
           if (!b.start) return 1;
           return toMinutes(a.start) - toMinutes(b.start);
         });
-        const doneCount = dayItems.filter(function (i) { return i.done; }).length;
+        const dayCheckable = dayItems.filter(function (i) { return i.type !== 'event'; });
+        const doneCount = dayCheckable.filter(function (i) { return i.done; }).length;
+        const dayEvents = dayItems.length - dayCheckable.length;
 
-        const head = document.createElement('div');
-        head.className = 'record-head';
-        head.innerHTML = '<h2 class="day-heading pixel" style="color: var(--purple); text-shadow: none"></h2><span class="score pixel"></span>';
-        // Today and future days only show what's done so far; past days show the full score
-        if (key === todayKey())     head.children[0].textContent = 'TODAY (SO FAR)';
-        else if (key > todayKey())  head.children[0].textContent = niceDate(key).toUpperCase() + ' (EARLY)';
-        else                        head.children[0].textContent = niceDate(key).toUpperCase();
-        head.children[1].textContent = key >= todayKey() ? doneCount + ' DONE' : 'CLEAR ' + doneCount + '/' + dayItems.length;
+        // Folded? The 2 most recent days start open, older ones start folded
+        const foldKey = recordFilter + ' ' + key;     // each filter remembers its own folding
+        const isFolded = foldKey in folded ? folded[foldKey] : n >= 2;
+
+        // The heading (tap it to fold/unfold)
+        const head = document.createElement('button');
+        head.type = 'button';
+        head.className = 'record-head' + (isFolded ? ' folded' : '');
+        head.innerHTML = '<span class="day-heading pixel" style="color: var(--purple); text-shadow: none"><i class="ti ti-chevron-down chev"></i><span></span></span><span class="score pixel"></span>';
+        let title = niceDate(key).toUpperCase();
+        if (key === todayKey()) title = 'TODAY (SO FAR)';
+        else if (key > todayKey()) title += ' (EARLY)';
+        head.querySelector('.day-heading span').textContent = title;
+        const score = [];
+        if (dayCheckable.length) score.push(key >= todayKey() ? doneCount + ' DONE' : 'CLEAR ' + doneCount + '/' + dayCheckable.length);
+        if (dayEvents) score.push(dayEvents + ' EVENT' + (dayEvents === 1 ? '' : 'S'));
+        head.querySelector('.score').textContent = score.join(' · ');
+        head.onclick = function () { folded[foldKey] = !isFolded; drawRecord(); };
         page.appendChild(head);
+        if (isFolded) return;
 
         const box = document.createElement('div');
         box.className = 'list glow-cyan';
-        dayItems.forEach(function (i) {
-          const row = document.createElement('div');
-          row.className = 'item record ' + i.type + (i.done ? ' done' : '');
-
-          const time = document.createElement('div');
-          time.className = 'time';
-          time.innerHTML = '<span></span><span class="end"></span>';
-          time.children[0].textContent = i.start || '—';
-          time.children[1].textContent = i.end || '';
-
-          const name = document.createElement('div');
-          name.className = 'name';
-          name.textContent = i.name;
-          const stars = starsFor(i);
-          if (stars) name.appendChild(stars);
-          if (lengthOf(i)) {
-            const dur = document.createElement('span');
-            dur.className = 'dur';
-            dur.textContent = durationText(lengthOf(i));
-            name.appendChild(dur);
-          }
-          const tag = document.createElement('span');
-          tag.className = 'type-tag ' + i.type;
-          tag.textContent = i.type === 'task' ? 'task' : 'reminder';
-          name.appendChild(tag);
-
-          // Done = pink check, not done = red X, still waiting for an answer = yellow hourglass
-          const slot = document.createElement('div');
-          slot.className = 'slot';
-          if (i.done) slot.innerHTML = '<i class="ti ti-circle-check status-done"></i>';
-          else if (i.dropped) slot.innerHTML = '<i class="ti ti-circle-x status-missed"></i>';
-          else slot.innerHTML = '<i class="ti ti-hourglass status-wait"></i>';
-
-          row.append(time, name, slot);
-          box.appendChild(row);
-        });
+        dayItems.forEach(function (i) { box.appendChild(recordRow(i)); });
         page.appendChild(box);
       });
+    }
+
+    // One row of the record
+    function recordRow(i) {
+      const row = document.createElement('div');
+      row.className = 'item record ' + i.type + (i.done ? ' done' : '');
+
+      const time = document.createElement('div');
+      time.className = 'time';
+      time.innerHTML = '<span></span><span class="end"></span>';
+      time.children[0].textContent = i.start || '—';
+      time.children[1].textContent = i.end || '';
+
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = i.name;
+      const cat = i.type === 'event' ? catById(i.cat) : null;
+      if (cat) {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.textContent = cat.name.toUpperCase();
+        chip.style.color = cat.color;
+        chip.style.background = tint(cat.color, 0.18);
+        name.insertBefore(chip, name.firstChild);
+      }
+      const stars = starsFor(i);
+      if (stars) name.appendChild(stars);
+      if (lengthOf(i)) {
+        const dur = document.createElement('span');
+        dur.className = 'dur';
+        dur.textContent = durationText(lengthOf(i));
+        name.appendChild(dur);
+      }
+      if (recordFilter === 'all') {           // with everything mixed, say what each one is
+        const tag = document.createElement('span');
+        tag.className = 'type-tag ' + i.type;
+        tag.textContent = i.type;
+        name.appendChild(tag);
+      }
+
+      // Done = pink check, not completed = red X, waiting for an answer = yellow hourglass, event = calendar
+      const slot = document.createElement('div');
+      slot.className = 'slot';
+      if (i.type === 'event') slot.innerHTML = '<i class="ti ti-calendar-check status-event"></i>';
+      else if (i.done) slot.innerHTML = '<i class="ti ti-circle-check status-done"></i>';
+      else if (i.dropped) slot.innerHTML = '<i class="ti ti-circle-x status-missed"></i>';
+      else slot.innerHTML = '<i class="ti ti-hourglass status-wait"></i>';
+
+      row.append(time, name, slot);
+      return row;
     }
 
     // STEP 9: The pop-up panel for adding and editing tasks, reminders and events.
@@ -1045,7 +1524,8 @@
         btn.classList.toggle('on', btn.dataset.kind === kind);
       });
       field('sheet-title').textContent = (editing ? 'EDIT ' : 'NEW ') + kind.toUpperCase();
-      field('imp-fields').classList.toggle('hidden', kind === 'event');   // events don't need importance
+      field('imp-fields').classList.toggle('hidden', kind === 'event');       // events don't need importance
+      field('f-cat-fields').classList.toggle('hidden', kind !== 'event');     // ...but they can have a category
       errorText.textContent = '';
     }
     document.querySelectorAll('.kind').forEach(function (btn) {
@@ -1068,12 +1548,12 @@
       btn.onclick = function () { field(btn.dataset.clear).value = ''; errorText.textContent = ''; };
     });
 
-    function openSheet(item, startKind) {
+    function openSheet(item, startKind, presetDate) {
       editing = item || null;
       field('btn-delete').classList.toggle('hidden', !editing);
 
       field('f-name').value  = editing ? editing.name : '';
-      field('f-date').value  = editing ? editing.date : '';
+      field('f-date').value  = editing ? editing.date : (presetDate || '');
       field('f-start').value = editing && editing.start ? editing.start : '';
       field('f-end').value   = editing && editing.end ? editing.end : '';
       field('f-dur').value   = editing ? lengthOf(editing) : 0;
@@ -1083,6 +1563,7 @@
       setMode(editing && !editing.start && editing.dur ? 'dur' : 'end');
       setKind(editing ? editing.type : (startKind || 'task'));
       setImportance(editing ? (editing.imp || 0) : 0);
+      eventCats.open(editing ? editing.cat : '');
       showFitBox();
       sheet.classList.remove('hidden');
     }
@@ -1131,12 +1612,13 @@
       }
 
       const data = { type: kind, name: name, date: date, start: start, end: end, dur: dur,
-                     imp: kind === 'event' ? 0 : importance };
+                     imp: kind === 'event' ? 0 : importance,
+                     cat: kind === 'event' ? eventCats.value : '' };
       if (editing) {
         Object.assign(editing, data);
         if (kind === 'event') editing.done = false;   // events have no check
       } else {
-        data.id = Date.now();
+        data.id = newId();
         data.done = false;
         items.push(data);
       }
@@ -1308,7 +1790,7 @@
         },
         // "+" makes a fresh copy for today, so the Record still shows the old one as not done
         add: function (i) {
-          items.push({ id: Date.now(), type: i.type, name: i.name, date: todayKey(), start: i.start, end: i.end, dur: i.dur || 0, done: false });
+          items.push({ id: newId(), type: i.type, name: i.name, date: todayKey(), start: i.start, end: i.end, dur: i.dur || 0, done: false });
         }
       },
       { title: 'CHORES',   icon: 'ti-bucket', color: 'var(--cyan)',   locked: 'Unlocks when we build Chores.' },
@@ -1370,6 +1852,967 @@
     field('sugg-btn').onclick = function () { drawSuggestions(); suggSheet.classList.remove('hidden'); };
     field('sugg-close').onclick = function () { suggSheet.classList.add('hidden'); };
     suggSheet.onclick = function (e) { if (e.target === suggSheet) suggSheet.classList.add('hidden'); };
+
+    // STEP 12: THE ROUTINE (Calendar → Routine)
+    // Your routine is made of BLOCKS (like "Work · 7h 30m"). Each block lives on a shelf:
+    //   Permanent blocks: once placed on a day and time, they repeat EVERY week.
+    //   Temporary blocks: placed only in ONE week. They stay on the shelf to place again later.
+    // A permanent block can be skipped for one week (for example, when a temporary block replaces it).
+    const DAY_START = 0;            // the grid starts at midnight...
+    const DAY_END = 24;             // ...and ends at the next midnight
+    const OPEN_AT = 5;              // when you open the page, it scrolls to 05:00
+    const HOUR_H = 44;              // pixels per hour in the grid (the box shows 9 hours)
+    const PX = HOUR_H / 60;         // pixels per minute
+    const DAY_LETTERS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+    const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    // The routine's memory:
+    //   blocks: the blocks on your shelves          { id, name, dur, cat (a category id or ''), kind: 'perm' or 'temp' }
+    //   perm:   where permanent blocks are placed   { id, blockId, day (0 = Sunday), start, skips: [weeks skipped] }
+    //   temp:   where temporary blocks are placed   { id, blockId, week, day, start }
+    //   cats:   your categories                     { id, name, color }
+    let routine = (function () {
+      try { return JSON.parse(localStorage.getItem('brainfog-routine')); }
+      catch (e) { return null; }
+    })() || { blocks: [], perm: [], temp: [] };
+    if (!routine.cats) {
+      // Start with two categories. You can rename, recolor or delete them.
+      routine.cats = [
+        { id: 'chore', name: 'Chore', color: '#5dff9b' },
+        { id: 'project', name: 'Project', color: '#b59cff' }
+      ];
+    }
+    function saveRoutine() { save('brainfog-routine', routine); }
+
+    // The colors you can pick for a category
+    const CAT_COLORS = ['#29e7ff', '#5dff9b', '#b59cff', '#ff3fa4', '#ffe14d', '#ff9f43', '#4d7cff', '#ff5a5a'];
+    function catById(id) { return routine.cats.find(function (c) { return c.id === id; }); }
+    // "#ff3fa4" + 0.2 → a see-through version of that color
+    function tint(hex, alpha) {
+      const n = parseInt(hex.slice(1), 16);
+      return 'rgba(' + (n >> 16) + ', ' + ((n >> 8) & 255) + ', ' + (n & 255) + ', ' + alpha + ')';
+    }
+    // Give a block element its category color (no category = the default color)
+    function paintBlock(el, block) {
+      const cat = catById(block.cat);
+      if (!cat) return;
+      el.style.setProperty('--c', cat.color);
+      el.style.background = tint(cat.color, 0.2);
+    }
+
+    // Date helpers for weeks (weeks start on Sunday)
+    function fromKey(key) {
+      const p = key.split('-');
+      return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+    }
+    function weekStartOf(d) {
+      const s = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      s.setDate(s.getDate() - s.getDay());
+      return s;
+    }
+    function addDays(d, n) {
+      const c = new Date(d);
+      c.setDate(c.getDate() + n);
+      return c;
+    }
+    function shortDate(d) { return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+    function blockById(id) { return routine.blocks.find(function (b) { return b.id === id; }); }
+    function endOf(start, dur) { return toTime(Math.min(toMinutes(start) + dur, 24 * 60)); }
+
+    let viewWeek = weekStartOf(new Date());   // the week the grid is showing
+    function viewWeekKey() { return dateKey(viewWeek); }
+
+    // What the routine puts on one day (Home uses this)
+    function routineForDay(key) {
+      const d = fromKey(key);
+      const week = dateKey(weekStartOf(d));
+      const day = d.getDay();
+      const out = [];
+      routine.perm.forEach(function (p) {
+        const b = blockById(p.blockId);
+        if (!b || p.day !== day || p.skips.indexOf(week) !== -1) return;
+        out.push({ name: b.name, start: p.start, end: endOf(p.start, b.dur), cat: catById(b.cat) });
+      });
+      routine.temp.forEach(function (t) {
+        const b = blockById(t.blockId);
+        if (!b || t.week !== week || t.day !== day) return;
+        out.push({ name: b.name, start: t.start, end: endOf(t.start, b.dur), cat: catById(b.cat), temp: true });
+      });
+      return out;
+    }
+
+    // ---- Drawing the week grid ----
+    function drawCalendar() {
+      drawMonth();                                   // the Month view (STEP 13)
+      const scrollBox = field('rgrid-scroll');
+      const keepScroll = scrollBox.scrollTop;        // redrawing shouldn't make the hours jump
+      field('rgrid').style.setProperty('--hour', HOUR_H + 'px');
+      const weekKey = viewWeekKey();
+      field('wk-label').textContent = shortDate(viewWeek) + ' – ' + shortDate(addDays(viewWeek, 6));
+      field('wk-today').classList.toggle('hidden', weekKey === dateKey(weekStartOf(new Date())));
+
+      // Row 1: the day letters and dates
+      const head = field('rgrid-head');
+      head.innerHTML = '<div></div>';
+      for (let d = 0; d < 7; d++) {
+        const date = addDays(viewWeek, d);
+        const cell = document.createElement('div');
+        if (dateKey(date) === todayKey()) cell.className = 'today';
+        cell.innerHTML = DAY_LETTERS[d] + '<b>' + date.getDate() + '</b>';
+        head.appendChild(cell);
+      }
+
+      // Events of this week (from the calendar, can't be moved here)
+      const weekEvents = items.filter(function (i) {
+        return i.type === 'event' && i.date >= weekKey && i.date <= dateKey(addDays(viewWeek, 6));
+      });
+
+      // Row 2: events with no start time, as small tags on top
+      const allday = field('rgrid-allday');
+      allday.innerHTML = '<div></div>';
+      let anyAllday = false;
+      for (let d = 0; d < 7; d++) {
+        const cell = document.createElement('div');
+        cell.className = 'rcell';
+        const key = dateKey(addDays(viewWeek, d));
+        weekEvents.forEach(function (ev) {
+          if (ev.date !== key || ev.start) return;
+          anyAllday = true;
+          const tag = document.createElement('div');
+          tag.className = 'ev';
+          tag.textContent = ev.name;
+          const evCat = catById(ev.cat);
+          if (evCat) { tag.style.color = evCat.color; tag.style.borderColor = evCat.color; }
+          tag.onclick = eventTapped;
+          cell.appendChild(tag);
+        });
+        allday.appendChild(cell);
+      }
+      allday.classList.toggle('hidden', !anyAllday);
+
+      // Row 3: the hours and the 7 day columns
+      const body = field('rgrid-body');
+      body.innerHTML = '';
+      const height = (DAY_END - DAY_START) * HOUR_H;
+
+      const hours = document.createElement('div');
+      hours.className = 'rhours';
+      hours.style.height = height + 'px';
+      for (let h = DAY_START + 1; h < DAY_END; h++) {   // 01, 02 ... 23
+        const label = document.createElement('span');
+        label.style.top = ((h - DAY_START) * HOUR_H) + 'px';
+        label.textContent = String(h).padStart(2, '0');
+        hours.appendChild(label);
+      }
+      body.appendChild(hours);
+
+      for (let d = 0; d < 7; d++) {
+        const key = dateKey(addDays(viewWeek, d));
+        const col = document.createElement('div');
+        col.className = 'rcol' + (key === todayKey() ? ' today' : '');
+        col.style.height = height + 'px';
+        col.dataset.day = d;
+
+        // Everything in this column: permanent, temporary and events
+        const entries = [];
+        routine.perm.forEach(function (p) {
+          const b = blockById(p.blockId);
+          if (!b || p.day !== d) return;
+          const skipped = p.skips.indexOf(weekKey) !== -1;
+          entries.push({ kind: skipped ? 'skipped' : 'perm', place: p, block: b, name: b.name, start: toMinutes(p.start), dur: b.dur });
+        });
+        routine.temp.forEach(function (t) {
+          const b = blockById(t.blockId);
+          if (!b || t.week !== weekKey || t.day !== d) return;
+          entries.push({ kind: 'temp', place: t, block: b, name: b.name, start: toMinutes(t.start), dur: b.dur });
+        });
+        weekEvents.forEach(function (ev) {
+          if (ev.date !== key || !ev.start) return;
+          entries.push({ kind: 'event', name: ev.name, start: toMinutes(ev.start), dur: Math.max(lengthOf(ev), 30), cat: catById(ev.cat) });
+        });
+
+        // When things overlap, they STACK: the one that starts later (or is shorter) goes on top,
+        // nudged a little to the right so you can still see the one underneath.
+        const active = entries.filter(function (e) { return e.kind !== 'skipped'; })
+                              .sort(function (a, b) { return (a.start - b.start) || (b.dur - a.dur); });
+        active.forEach(function (e, n) {
+          e.layer = 0;
+          for (let k = 0; k < n; k++) {
+            const under = active[k];
+            if (under.start < e.start + e.dur && under.start + under.dur > e.start) e.layer = Math.max(e.layer, under.layer + 1);
+          }
+          e.order = n;
+        });
+
+        entries.forEach(function (e) {
+          const el = makeBlockEl(e);
+          const top = Math.max(e.start - DAY_START * 60, 0);
+          const bottom = Math.min(e.start + e.dur, DAY_END * 60) - DAY_START * 60;
+          el.style.top = (top * PX) + 'px';
+          el.style.height = Math.max((bottom - top) * PX - 2, 14) + 'px';
+          const layer = e.kind === 'skipped' ? 0 : e.layer;
+          el.style.left = (1 + layer * 6) + 'px';
+          el.style.right = '1px';
+          if (e.kind !== 'skipped') {
+            el.style.zIndex = 2 + e.order;                                   // later ones on top
+            if (layer) el.classList.add('stacked');
+          }
+          col.appendChild(el);
+        });
+
+        // The red "now" line on today
+        if (key === todayKey()) {
+          const now = new Date();
+          const minutes = now.getHours() * 60 + now.getMinutes();
+          if (minutes >= DAY_START * 60) {
+            const line = document.createElement('div');
+            line.className = 'rnow';
+            line.style.top = ((minutes - DAY_START * 60) * PX) + 'px';
+            col.appendChild(line);
+          }
+        }
+        body.appendChild(col);
+      }
+
+      scrollBox.scrollTop = keepScroll;
+      drawShelves();
+    }
+
+    // One block in the grid
+    function makeBlockEl(e) {
+      const el = document.createElement('div');
+      let cls = 'rblock';
+      if (e.kind === 'event') cls += ' event';
+      else {
+        cls += ' ' + (catById(e.block.cat) ? 'hascat' : 'plain');
+        if (e.kind === 'temp') cls += ' temp';
+        if (e.kind === 'skipped') cls += ' skipped';
+      }
+      el.className = cls;
+      el.textContent = e.name;
+      if (e.block && e.kind !== 'skipped') paintBlock(el, e.block);
+      if (e.kind === 'event' && e.cat) {
+        el.style.setProperty('--c', e.cat.color);
+        el.style.background = 'repeating-linear-gradient(45deg, ' + tint(e.cat.color, 0.25) + ' 0 4px, ' + tint(e.cat.color, 0.08) + ' 4px 8px)';
+      }
+      if (e.dur >= 45) {
+        const t = document.createElement('span');
+        t.className = 'bt';
+        t.textContent = toTime(e.start);
+        el.appendChild(t);
+      }
+
+      if (e.kind === 'event') {
+        el.onclick = eventTapped;                           // events are locked here
+      } else if (e.kind === 'skipped') {
+        el.onclick = function () { blockOptions(e); };
+      } else {
+        el.onpointerdown = function (ev) { startDrag(ev, { from: 'grid', kind: e.kind, place: e.place, block: e.block, el: el }); };
+      }
+      return el;
+    }
+
+    function eventTapped() { toast('Events are edited in Calendar → Month.'); }
+
+    // ---- The shelves ----
+    function drawShelves() {
+      ['perm', 'temp'].forEach(function (kind) {
+        const shelf = field('shelf-' + kind);
+        shelf.innerHTML = '';
+        const blocks = routine.blocks.filter(function (b) { return b.kind === kind; });
+        if (!blocks.length) {
+          shelf.innerHTML = '<p class="shelf-empty">No blocks yet. Tap "+ New" to make one.</p>';
+          return;
+        }
+        blocks.forEach(function (b) {
+          const chip = document.createElement('div');
+          chip.className = 'chipblock ' + (catById(b.cat) ? 'hascat' : 'plain') + (kind === 'temp' ? ' temp' : '');
+          paintBlock(chip, b);
+          chip.innerHTML = '<span></span><small></small>';
+          chip.children[0].textContent = b.name;
+          chip.children[1].textContent = durationText(b.dur);
+          chip.onpointerdown = function (ev) { startDrag(ev, { from: 'shelf', block: b, el: chip }); };
+          shelf.appendChild(chip);
+        });
+      });
+    }
+
+    // ---- DRAG AND DROP ----
+    // Press on a block and move your finger: a copy (the "ghost") follows you,
+    // and a yellow box shows where it will land, snapped to 15 minutes.
+    // Press and let go without moving = a tap, which opens options instead.
+    let drag = null;
+    let ghost = null;
+    let preview = null;
+
+    function startDrag(ev, info) {
+      if (ev.button) return;   // only the main mouse button (or a finger)
+      const rect = info.el.getBoundingClientRect();
+      drag = info;
+      drag.x0 = drag.x = ev.clientX;
+      drag.y0 = drag.y = ev.clientY;
+      drag.moved = false;
+      drag.target = null;
+      // Where you grabbed it, so it doesn't jump under your finger
+      drag.grabX = info.from === 'grid' ? ev.clientX - rect.left : null;
+      drag.grabY = info.from === 'grid' ? ev.clientY - rect.top : 10;
+    }
+
+    document.addEventListener('pointermove', function (ev) {
+      if (!drag) return;
+      drag.x = ev.clientX;
+      drag.y = ev.clientY;
+      if (!drag.moved) {
+        if (Math.abs(drag.x - drag.x0) + Math.abs(drag.y - drag.y0) < 8) return;   // not a drag yet
+        beginDrag();
+      }
+      ev.preventDefault();
+      moveGhost();
+      findTarget();
+    }, { passive: false });
+
+    document.addEventListener('pointerup', function () {
+      if (!drag) return;
+      const d = drag;
+      drag = null;
+      if (!d.moved) {                        // it was a tap
+        if (d.from === 'shelf') openBlockSheet(d.block);
+        else blockOptions({ kind: d.kind, place: d.place, block: d.block });
+        return;
+      }
+      endDrag(d);
+      if (d.target) dropBlock(d);
+    });
+
+    document.addEventListener('pointercancel', function () {
+      if (drag && drag.moved) endDrag(drag);
+      drag = null;
+    });
+
+    function columnWidth() {
+      const col = document.querySelector('#rgrid-body .rcol');
+      return col ? col.getBoundingClientRect().width : 44;
+    }
+
+    function beginDrag() {
+      drag.moved = true;
+      const b = drag.block;
+      const kind = drag.from === 'grid' ? drag.kind : b.kind;
+      ghost = document.createElement('div');
+      ghost.className = 'rblock ghost ' + (catById(b.cat) ? 'hascat' : 'plain') + (kind === 'temp' ? ' temp' : '');
+      ghost.textContent = b.name;
+      paintBlock(ghost, b);
+      ghost.style.width = (columnWidth() - 2) + 'px';
+      ghost.style.height = Math.max(b.dur * PX - 2, 14) + 'px';
+      document.body.appendChild(ghost);
+      if (drag.grabX === null) drag.grabX = columnWidth() / 2;
+      if (drag.from === 'grid') drag.el.classList.add('dragging');
+      requestAnimationFrame(autoScroll);
+    }
+
+    function moveGhost() {
+      ghost.style.left = (drag.x - drag.grabX) + 'px';
+      ghost.style.top = (drag.y - drag.grabY) + 'px';
+    }
+
+    // Work out which day and time the block is over
+    function findTarget() {
+      const centerX = drag.x - drag.grabX + columnWidth() / 2;
+      const box = field('rgrid-scroll').getBoundingClientRect();   // the visible hours
+      let target = null;
+      if (drag.y < box.top - 30 || drag.y > box.bottom + 30) { drag.target = null; showPreview(null); return; }
+      document.querySelectorAll('#rgrid-body .rcol').forEach(function (col) {
+        const r = col.getBoundingClientRect();
+        if (centerX >= r.left && centerX < r.right) {
+          const topPx = (drag.y - drag.grabY) - r.top;
+          let start = DAY_START * 60 + Math.round(topPx / PX / 15) * 15;          // snap to 15 minutes
+          start = Math.max(DAY_START * 60, Math.min(start, DAY_END * 60 - drag.block.dur));
+          target = { day: Number(col.dataset.day), start: start, col: col };
+        }
+      });
+      drag.target = target;
+      showPreview(target);
+    }
+
+    function showPreview(target) {
+      if (!target) { if (preview) preview.remove(); preview = null; return; }
+      if (!preview) {
+        preview = document.createElement('div');
+        preview.className = 'rpreview';
+        preview.innerHTML = '<span></span>';
+      }
+      preview.style.top = ((target.start - DAY_START * 60) * PX) + 'px';
+      preview.style.height = Math.max(drag.block.dur * PX - 2, 14) + 'px';
+      preview.firstChild.textContent = toTime(target.start);
+      target.col.appendChild(preview);
+    }
+
+    // While dragging near an edge, scroll so you can reach any hour:
+    // near the top or bottom of the hours box → the hours scroll;
+    // near the top or bottom of the screen → the page scrolls.
+    function autoScroll() {
+      if (!drag || !drag.moved) return;
+      const hours = field('rgrid-scroll');
+      const h = hours.getBoundingClientRect();
+      const main = field('main');
+      const m = main.getBoundingClientRect();
+      const overHours = drag.x > h.left && drag.x < h.right && drag.y > h.top - 30 && drag.y < h.bottom + 30;
+      let edge = null;
+      if (overHours && drag.y < h.top + 36) edge = 'hours-up';
+      else if (overHours && drag.y > h.bottom - 36) edge = 'hours-down';
+      else if (drag.y < m.top + 50) edge = 'page-up';
+      else if (drag.y > m.bottom - 50) edge = 'page-down';
+
+      // Only scroll after your finger rests at an edge for a moment,
+      // so just passing through an edge on the way doesn't move anything
+      if (edge !== drag.edge) { drag.edge = edge; drag.edgeSince = Date.now(); }
+      if (edge && Date.now() - drag.edgeSince > 350) {
+        if (edge === 'hours-up') hours.scrollTop -= 3;
+        if (edge === 'hours-down') hours.scrollTop += 3;
+        if (edge === 'page-up') main.scrollTop -= 6;
+        if (edge === 'page-down') main.scrollTop += 6;
+        findTarget();
+      }
+      requestAnimationFrame(autoScroll);
+    }
+
+    function endDrag(d) {
+      if (ghost) ghost.remove();
+      ghost = null;
+      if (preview) preview.remove();
+      preview = null;
+      if (d.el) d.el.classList.remove('dragging');
+    }
+
+    // Let go on the grid: place it, or move it
+    function dropBlock(d) {
+      const start = toTime(d.target.start);
+      const day = d.target.day;
+
+      if (d.from === 'shelf' && d.block.kind === 'perm') {
+        routine.perm.push({ id: newId(), blockId: d.block.id, day: day, start: start, skips: [] });
+      } else if (d.from === 'shelf') {
+        const placed = { id: newId(), blockId: d.block.id, week: viewWeekKey(), day: day, start: start };
+        routine.temp.push(placed);
+        saveRoutine();
+        drawCalendar();
+        offerReplace(placed);
+        return;
+      } else {
+        d.place.day = day;                   // moving a permanent block moves it in every week
+        d.place.start = start;
+        if (d.kind === 'temp') {
+          saveRoutine();
+          drawCalendar();
+          offerReplace(d.place);
+          return;
+        }
+      }
+      saveRoutine();
+      drawCalendar();
+    }
+
+    // A temporary block on top of a permanent one? Offer to skip the permanent one that week.
+    function offerReplace(t) {
+      const b = blockById(t.blockId);
+      const s = toMinutes(t.start);
+      const e = s + b.dur;
+      const covered = routine.perm.filter(function (p) {
+        const pb = blockById(p.blockId);
+        if (!pb || p.day !== t.day || p.skips.indexOf(t.week) !== -1) return false;
+        const ps = toMinutes(p.start);
+        return ps < e && ps + pb.dur > s;
+      });
+      if (!covered.length) return;
+      const names = covered.map(function (p) { return blockById(p.blockId).name; }).join(', ');
+      openActions('REPLACE?', b.name + ' overlaps ' + names + ' on ' + DAY_NAMES[t.day] + '.', [
+        { icon: 'ti-replace', label: 'Replace ' + names + ' this week', run: function () {
+          covered.forEach(function (p) { p.skips.push(t.week); });
+        } },
+        { icon: 'ti-layers-intersect', label: 'Keep both', run: function () {} }
+      ]);
+    }
+
+    // ---- Options when you tap a block in the week ----
+    function blockOptions(e) {
+      const b = e.block;
+      const p = e.place;
+      const time = p.start + '–' + endOf(p.start, b.dur);
+      const week = viewWeekKey();
+      const edit = { icon: 'ti-pencil', label: 'Edit block', run: function () { openBlockSheet(b); } };
+
+      if (e.kind === 'temp') {
+        openActions(b.name.toUpperCase(), 'Only this week · ' + DAY_NAMES[p.day] + ' · ' + time, [
+          { icon: 'ti-trash', label: 'Remove from this week', run: function () {
+            routine.temp = routine.temp.filter(function (t) { return t !== p; });
+          } },
+          edit
+        ]);
+      } else if (e.kind === 'skipped') {
+        openActions(b.name.toUpperCase(), 'Skipped this week · every ' + DAY_NAMES[p.day] + ' · ' + time, [
+          { icon: 'ti-arrow-back-up', label: 'Bring it back this week', run: function () {
+            p.skips = p.skips.filter(function (w) { return w !== week; });
+          } },
+          { icon: 'ti-trash', label: 'Remove from every week', run: function () {
+            routine.perm = routine.perm.filter(function (x) { return x !== p; });
+          } }
+        ]);
+      } else {
+        openActions(b.name.toUpperCase(), 'Every ' + DAY_NAMES[p.day] + ' · ' + time, [
+          { icon: 'ti-player-skip-forward', label: 'Skip this week only', run: function () { p.skips.push(week); } },
+          { icon: 'ti-trash', label: 'Remove from every week', run: function () {
+            routine.perm = routine.perm.filter(function (x) { return x !== p; });
+          } },
+          edit
+        ]);
+      }
+    }
+
+    // A panel with a list of choices; each choice saves and redraws when tapped
+    function openActions(title, info, choices) {
+      field('act-title').textContent = title;
+      field('act-info').textContent = info;
+      const box = field('act-choices');
+      box.innerHTML = '';
+      choices.forEach(function (c) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.innerHTML = '<i class="ti ' + c.icon + '"></i><span></span>';
+        btn.querySelector('span').textContent = c.label;
+        btn.onclick = function () {
+          field('act-sheet').classList.add('hidden');
+          c.run();
+          saveRoutine();
+          drawCalendar();
+        };
+        box.appendChild(btn);
+      });
+      field('act-sheet').classList.remove('hidden');
+    }
+    field('act-close').onclick = function () { field('act-sheet').classList.add('hidden'); };
+    field('act-sheet').onclick = function (e) { if (e.target === field('act-sheet')) field('act-sheet').classList.add('hidden'); };
+
+    // ---- A category picker (used by the block panel AND the event panel) ----
+    // It shows: None, each of your categories, and "+ New" (make one right there).
+    // "prefix" is the start of its element names, like 'b' for b-cats, b-newcat...
+    function makeCatPicker(prefix, errorId) {
+      const picker = { value: '', color: CAT_COLORS[0] };
+
+      picker.draw = function () {
+        const box = field(prefix + '-cats');
+        box.innerHTML = '';
+        const choices = [{ id: '', name: 'None', color: '#29e7ff' }].concat(routine.cats);
+        if (picker.value && !catById(picker.value)) picker.value = '';   // it was deleted
+        choices.forEach(function (c) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'opt' + (c.id === picker.value ? ' on' : '');
+          btn.textContent = c.name;
+          btn.style.setProperty('--c', c.color);
+          btn.onclick = function () { picker.value = c.id; picker.draw(); };
+          box.appendChild(btn);
+        });
+        const add = document.createElement('button');
+        add.type = 'button';
+        add.className = 'opt new';
+        add.innerHTML = '<i class="ti ti-plus"></i> New';
+        add.onclick = function () {
+          field(prefix + '-newcat').classList.toggle('hidden');
+          field(prefix + '-ncname').value = '';
+          field(prefix + '-ncname').focus();
+        };
+        box.appendChild(add);
+        drawSwatches(field(prefix + '-nccolors'), picker.color, function (c) { picker.color = c; picker.draw(); });
+      };
+
+      picker.open = function (value) {
+        picker.value = value || '';
+        field(prefix + '-newcat').classList.add('hidden');
+        picker.draw();
+      };
+
+      // Make a new category and choose it
+      field(prefix + '-ncadd').onclick = function () {
+        const name = field(prefix + '-ncname').value.trim();
+        if (!name) { field(errorId).textContent = 'Give the category a name.'; return; }
+        const cat = { id: newId(), name: name, color: picker.color };
+        routine.cats.push(cat);
+        saveRoutine();
+        picker.value = cat.id;
+        field(prefix + '-newcat').classList.add('hidden');
+        picker.draw();
+      };
+      return picker;
+    }
+
+    // Color dots to pick from
+    function drawSwatches(box, current, pick) {
+      box.innerHTML = '';
+      CAT_COLORS.forEach(function (color) {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'swatch' + (color === current ? ' on' : '');
+        dot.style.background = color;
+        dot.style.color = color;
+        dot.setAttribute('aria-label', 'Color ' + color);
+        dot.onclick = function () { pick(color); };
+        box.appendChild(dot);
+      });
+    }
+
+    const blockCats = makeCatPicker('b', 'b-error');   // in the block panel
+    const eventCats = makeCatPicker('f', 'f-error');   // in the add panel (events)
+
+    // ---- Making and editing blocks ----
+    // Permanent: name, start, then end time OR duration, days, category.
+    // Temporary: only name, duration and category (you place it by dragging).
+    let editingBlock = null;
+    let blockKind = 'perm';
+    let blockDays = [];         // the chosen days (0 = Sunday)
+    let originalStart = '';     // the start time when the panel opened (to notice a change)
+    let bMode = 'end';          // "end" = type the end time, "dur" = pick a duration
+
+    // Durations from 15m up to 12h
+    for (let m = 15; m <= 720; m += 15) {
+      const option = document.createElement('option');
+      option.value = m;
+      option.textContent = durationText(m);
+      field('b-dur').appendChild(option);
+    }
+
+    function setBlockMode(mode) {
+      bMode = mode;
+      const perm = blockKind === 'perm';
+      field('bm-end').classList.toggle('on', mode === 'end');
+      field('bm-dur').classList.toggle('on', mode === 'dur');
+      field('b-end-wrap').classList.toggle('hidden', !perm || mode !== 'end');
+      field('b-dur-wrap').classList.toggle('hidden', perm && mode !== 'dur');
+      field('b-error').textContent = '';
+    }
+    field('bm-end').onclick = function () { setBlockMode('end'); };
+    field('bm-dur').onclick = function () { setBlockMode('dur'); };
+
+    // The day buttons: Su Mo Tu We Th Fr Sa (pick as many as you like)
+    function drawDayChoices() {
+      const box = field('b-days');
+      box.innerHTML = '';
+      DAY_LETTERS.forEach(function (letter, d) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'dayb' + (blockDays.indexOf(d) !== -1 ? ' on' : '');
+        btn.textContent = letter;
+        btn.onclick = function () {
+          if (blockDays.indexOf(d) === -1) blockDays.push(d);
+          else blockDays = blockDays.filter(function (x) { return x !== d; });
+          field('b-error').textContent = '';
+          drawDayChoices();
+        };
+        box.appendChild(btn);
+      });
+    }
+
+    function openBlockSheet(block, kind) {
+      editingBlock = block || null;
+      blockKind = block ? block.kind : kind;
+      const perm = blockKind === 'perm';
+      field('block-title').textContent = (block ? 'EDIT ' : 'NEW ') + (perm ? 'PERMANENT' : 'TEMPORARY') + ' BLOCK';
+      field('block-hint').textContent = perm
+        ? 'Permanent blocks repeat every week.'
+        : 'Temporary blocks go on one week at a time: drag them onto the week you need. They stay on the shelf to use again.';
+      field('b-days-hint').textContent = 'Pick days and a start time, or leave them empty and drag the block onto the week later.';
+
+      // Temporary blocks don't have days, start or end
+      ['b-start-wrap', 'b-switch', 'b-days-wrap'].forEach(function (id) {
+        field(id).classList.toggle('hidden', !perm);
+      });
+
+      field('b-name').value = block ? block.name : '';
+      field('b-dur').value = block ? block.dur : 60;
+      field('b-error').textContent = '';
+      field('b-delete').classList.toggle('hidden', !block);
+
+      const placed = block && perm
+        ? routine.perm.filter(function (p) { return p.blockId === block.id; }).sort(function (a, b) { return a.day - b.day; })
+        : [];
+      blockDays = placed.map(function (p) { return p.day; });
+      originalStart = placed.length ? placed[0].start : '';
+      field('b-start').value = originalStart;
+      field('b-end').value = originalStart ? endOf(originalStart, block.dur) : '';
+
+      // With a start, show the end time; without one, show the duration
+      setBlockMode(perm && (!block || originalStart) ? 'end' : 'dur');
+      blockCats.open(block ? block.cat : '');
+      drawDayChoices();
+      field('block-sheet').classList.remove('hidden');
+    }
+    function closeBlockSheet() { field('block-sheet').classList.add('hidden'); editingBlock = null; }
+
+    field('new-perm').onclick = function () { openBlockSheet(null, 'perm'); };
+    field('new-temp').onclick = function () { openBlockSheet(null, 'temp'); };
+    field('b-cancel').onclick = closeBlockSheet;
+    field('block-sheet').onclick = function (e) { if (e.target === field('block-sheet')) closeBlockSheet(); };
+    field('b-name').oninput = field('b-start').oninput = field('b-end').oninput = function () { field('b-error').textContent = ''; };
+
+    field('block-form').onsubmit = function (e) {
+      e.preventDefault();
+      const error = function (text) { field('b-error').textContent = text; };
+      const name = field('b-name').value.trim();
+      if (!name) return error('Give the block a name.');
+      const perm = blockKind === 'perm';
+      const start = perm ? field('b-start').value : '';
+      let dur;
+
+      if (perm && bMode === 'end') {
+        const end = field('b-end').value;
+        if (!start || !end) return error('Add a start and an end time, or use Duration instead.');
+        dur = toMinutes(end) - toMinutes(start);
+        if (dur <= 0) return error('The end has to be after the start.');
+      } else {
+        dur = Number(field('b-dur').value);
+      }
+      if (perm) {
+        if (blockDays.length && !start) return error('Pick a start time for the days you chose.');
+        if (start && !blockDays.length) return error('Pick at least one day, or clear the start time.');
+        if (start && toMinutes(start) + dur > 24 * 60) return error('That goes past midnight. Pick an earlier start or a shorter duration.');
+      }
+
+      let block = editingBlock;
+      if (block) {
+        block.name = name;
+        block.dur = dur;
+        block.cat = blockCats.value;
+      } else {
+        block = { id: newId(), name: name, dur: dur, cat: blockCats.value, kind: blockKind };
+        routine.blocks.push(block);
+      }
+
+      // Permanent: match its places on the week to the days you picked
+      if (perm) {
+        const placed = routine.perm.filter(function (p) { return p.blockId === block.id; });
+        placed.forEach(function (p) {
+          if (blockDays.indexOf(p.day) === -1) routine.perm.splice(routine.perm.indexOf(p), 1);   // day unpicked → remove
+          else if (start !== originalStart) p.start = start;                                       // new start → move it
+        });
+        blockDays.forEach(function (d) {
+          if (placed.some(function (p) { return p.day === d; })) return;                           // already there
+          routine.perm.push({ id: newId(), blockId: block.id, day: d, start: start, skips: [] });
+        });
+      }
+
+      saveRoutine();
+      closeBlockSheet();
+      drawCalendar();
+    };
+
+    // ---- The Categories editor ----
+    function drawCatEditor() {
+      const box = field('cat-list');
+      box.innerHTML = '';
+      if (!routine.cats.length) box.innerHTML = '<p class="shelf-empty">No categories yet.</p>';
+      routine.cats.forEach(function (cat) {
+        const row = document.createElement('div');
+        row.className = 'cat-row';
+
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'cat-dot';
+        dot.style.background = cat.color;
+        dot.setAttribute('aria-label', 'Change color');
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = cat.name;
+        input.oninput = function () {
+          if (input.value.trim()) { cat.name = input.value.trim(); saveRoutine(); }
+        };
+
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'cat-del';
+        del.innerHTML = '<i class="ti ti-trash"></i>';
+        del.setAttribute('aria-label', 'Delete category');
+        del.onclick = function () {
+          // Blocks in this category keep existing, just without a category
+          routine.cats = routine.cats.filter(function (c) { return c !== cat; });
+          routine.blocks.forEach(function (b) { if (b.cat === cat.id) b.cat = ''; });
+          saveRoutine();
+          drawCatEditor();
+        };
+
+        // Tapping the dot shows the colors to pick from
+        const colors = document.createElement('div');
+        colors.className = 'swatches cat-colors hidden';
+        dot.onclick = function () { colors.classList.toggle('hidden'); };
+        drawSwatches(colors, cat.color, function (c) {
+          cat.color = c;
+          saveRoutine();
+          drawCatEditor();
+        });
+
+        row.append(dot, input, del, colors);
+        box.appendChild(row);
+      });
+    }
+    function openCatEditor() { drawCatEditor(); field('cat-sheet').classList.remove('hidden'); }
+    function closeCatEditor() {
+      field('cat-sheet').classList.add('hidden');
+      blockCats.draw();       // update the panels that might be open underneath
+      eventCats.draw();
+      redraw();
+    }
+    field('open-cats').onclick = openCatEditor;
+    field('b-edit-cats').onclick = openCatEditor;
+    field('f-edit-cats').onclick = openCatEditor;
+    field('cat-done').onclick = closeCatEditor;
+    field('cat-sheet').onclick = function (e) { if (e.target === field('cat-sheet')) closeCatEditor(); };
+    field('cat-add').onclick = function () {
+      const color = CAT_COLORS[routine.cats.length % CAT_COLORS.length];
+      routine.cats.push({ id: newId(), name: 'New category', color: color });
+      saveRoutine();
+      drawCatEditor();
+      const inputs = field('cat-list').querySelectorAll('input');
+      inputs[inputs.length - 1].select();     // ready to type the name
+    };
+
+    // Deleting a block also takes it off the week
+    field('b-delete').onclick = function () {
+      const id = editingBlock.id;
+      routine.blocks = routine.blocks.filter(function (b) { return b.id !== id; });
+      routine.perm = routine.perm.filter(function (p) { return p.blockId !== id; });
+      routine.temp = routine.temp.filter(function (t) { return t.blockId !== id; });
+      saveRoutine();
+      closeBlockSheet();
+      drawCalendar();
+    };
+
+    // ---- Week switcher and the Routine / Month switch ----
+    field('wk-prev').onclick = function () { viewWeek = addDays(viewWeek, -7); drawCalendar(); };
+    field('wk-next').onclick = function () { viewWeek = addDays(viewWeek, 7); drawCalendar(); };
+    field('wk-today').onclick = function () { viewWeek = weekStartOf(new Date()); drawCalendar(); };
+
+    function setCalView(view) {
+      field('cal-routine').classList.toggle('on', view === 'routine');
+      field('cal-month').classList.toggle('on', view === 'month');
+      field('routine-view').classList.toggle('hidden', view !== 'routine');
+      field('month-view').classList.toggle('hidden', view !== 'month');
+    }
+    field('cal-routine').onclick = function () { setCalView('routine'); };
+    field('cal-month').onclick = function () { setCalView('month'); };
+
+    // The little message at the bottom
+    let toastTimer = null;
+    function toast(message) {
+      const t = field('toast');
+      t.textContent = message;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2200);
+    }
+
+    // STEP 13: THE MONTH VIEW (Calendar → Month)
+    // Each day shows its events (yellow) and dots for reminders (green) and tasks (pink).
+    // Tap a day to see everything on it, edit it, or add an event on that date.
+    let viewMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);   // the month showing
+    let selectedDay = todayKey();                                                   // the day you tapped
+
+    function drawMonth() {
+      const y = viewMonth.getFullYear();
+      const m = viewMonth.getMonth();
+      field('mo-label').textContent = viewMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      const now = new Date();
+      field('mo-today').classList.toggle('hidden', y === now.getFullYear() && m === now.getMonth());
+
+      // Start on the Sunday before the 1st, and show 6 full weeks
+      const first = weekStartOf(viewMonth);
+      const grid = field('mgrid');
+      grid.innerHTML = '';
+      for (let n = 0; n < 42; n++) {
+        const date = addDays(first, n);
+        const key = dateKey(date);
+        // Stop after the month ends, once a week row is complete
+        if (n % 7 === 0 && n > 0 && date.getMonth() !== m && date > viewMonth) break;
+
+        const cell = document.createElement('button');
+        cell.type = 'button';
+        let cls = 'mcell';
+        if (date.getMonth() !== m) cls += ' other';
+        if (key < todayKey()) cls += ' past';
+        if (key === todayKey()) cls += ' today';
+        if (key === selectedDay) cls += ' selected';
+        cell.className = cls;
+
+        const num = document.createElement('span');
+        num.className = 'num';
+        num.textContent = date.getDate();
+        cell.appendChild(num);
+
+        // Events: up to 2 names, then "+1 more"
+        const dayItems = items.filter(function (i) { return i.date === key && !i.dropped; });
+        const events = dayItems.filter(function (i) { return i.type === 'event'; })
+          .sort(function (a, b) { return (a.start || '') < (b.start || '') ? -1 : 1; });
+        events.slice(0, 2).forEach(function (ev) {
+          const tag = document.createElement('span');
+          tag.className = 'mev';
+          tag.textContent = ev.name;
+          const cat = catById(ev.cat);
+          if (cat) { tag.style.color = cat.color; tag.style.background = tint(cat.color, 0.18); }
+          cell.appendChild(tag);
+        });
+        if (events.length > 2) {
+          const more = document.createElement('span');
+          more.className = 'more';
+          more.textContent = '+' + (events.length - 2) + ' more';
+          cell.appendChild(more);
+        }
+
+        // Dots: one per reminder (green) and task (pink), up to 4
+        const dots = document.createElement('span');
+        dots.className = 'dots';
+        dayItems.filter(function (i) { return i.type !== 'event'; }).slice(0, 4).forEach(function (i) {
+          const dot = document.createElement('i');
+          dot.className = 'dot';
+          dot.style.background = i.type === 'reminder' ? 'var(--green)' : 'var(--pink)';
+          if (i.done) dot.style.opacity = 0.35;       // finished ones are faded
+          dots.appendChild(dot);
+        });
+        cell.appendChild(dots);
+
+        cell.onclick = function () {
+          selectedDay = key;
+          // Tapping a day from the month before/after jumps to that month
+          if (date.getMonth() !== m) viewMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+          drawMonth();
+        };
+        grid.appendChild(cell);
+      }
+
+      drawMonthDay();
+    }
+
+    // The list for the day you tapped: events, reminders and tasks (the routine stays in Routine)
+    function drawMonthDay() {
+      field('mday-title').textContent = selectedDay === todayKey() ? 'TODAY' : niceDate(selectedDay).toUpperCase();
+      const all = itemsForDay(selectedDay);
+      const noRoutine = function (e) { return e.kind !== 'routine'; };
+      const day = { untimed: all.untimed.filter(noRoutine), timed: all.timed.filter(noRoutine) };
+      const box = field('mday-list');
+      fillList(box, day);
+      if (!day.untimed.length && !day.timed.length) {
+        box.innerHTML = '<div class="empty">Nothing planned for this day.</div>';
+      }
+      // You can only add things to today or later
+      field('mday-add').classList.toggle('hidden', selectedDay < todayKey());
+    }
+
+    field('mo-prev').onclick = function () { viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1); drawMonth(); };
+    field('mo-next').onclick = function () { viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1); drawMonth(); };
+    field('mo-today').onclick = function () {
+      viewMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+      selectedDay = todayKey();
+      drawMonth();
+    };
+    // "+ Add event" opens the usual panel, already set to Event on the day you picked
+    field('mday-add').onclick = function () { openSheet(null, 'event', selectedDay); };
 
     // STEP 11: Start everything
     let shownDay = '';
